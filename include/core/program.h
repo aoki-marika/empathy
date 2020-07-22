@@ -31,3 +31,9 @@ void program_init(struct program_t *program,
 /// Deinitialize the given program, releasing all of it's allocated resources.
 /// @param program The program to deinitialize.
 void program_deinit(struct program_t *program);
+
+/// Set the given program to be used for drawing.
+///
+/// This must be called again if another program is set to be used.
+/// @param program The program to use.
+void program_use(struct program_t *program);

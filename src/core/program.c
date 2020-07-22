@@ -40,3 +40,8 @@ void program_deinit(struct program_t *program)
 {
     glDeleteProgram(program->id);
 }
+
+void program_use(struct program_t *program)
+{
+    glUseProgram(program->id);
+}
