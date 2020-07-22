@@ -20,7 +20,7 @@ CORE_SRCS := $(wildcard $(CORE_SRC_DIR)/*.c)
 CORE_OBJS := $(CORE_SRCS:$(CORE_SRC_DIR)/%.c=$(CORE_OBJ_DIR)/%.o)
 CORE_DEPS := $(CORE_OBJS:%.o=%.d)
 CORE_CFLAGS := $(CFLAGS) -I$(CORE_INC_DIR)
-CORE_LDFLAGS := $(LDFLAGS)
+CORE_LDFLAGS := $(LDFLAGS) -lglfw -lGL
 CORE_OUT := $(BIN_DIR)/libcore.a
 
 $(CORE_OUT): $(CORE_OBJS) | $(BIN_DIR)
