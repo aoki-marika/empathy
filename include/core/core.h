@@ -4,6 +4,8 @@
 /// Core contexts are used to manage global core engine state.
 /// This is mostly used for initializing global C libraries like GLFW, which is shared across several other objects.
 ///
+/// All core context functions, unless specified otherwise, must be called on the main thread only.
+///
 
 // MARK: - Data Structures
 
@@ -25,3 +27,9 @@ void core_init(struct core_t *core);
 /// Deinitialize the given core context, releasing all of it's allocated resources.
 /// @param core The core context to deinitialize.
 void core_deinit(struct core_t *core);
+
+/// Poll for new global events within the given core context.
+///
+/// This should be called at the beginning of each frame, before updating anything else.
+/// @param core The core context to poll for global events.
+void core_poll_events(struct core_t *core);

@@ -35,6 +35,10 @@ void core_init(struct core_t *core)
 
 void core_deinit(struct core_t *core)
 {
-    // deinit glfw
     glfwTerminate();
+}
+
+void core_poll_events(struct core_t *core)
+{
+    glfwPollEvents();
 }
