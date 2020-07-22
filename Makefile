@@ -10,7 +10,7 @@ LDFLAGS :=
 
 AR := ar
 MKDIR := mkdir -p
-RM := rm -f
+RM := rm -rf
 MAKE := make
 CMAKE := cmake
 
@@ -58,8 +58,9 @@ $(GAME_OBJ_DIR):
 
 # cimgui and imgui impls
 CIMGUI_DIR := cimgui
+CIMGUI_BIN_DIR := $(BIN_DIR)/$(CIMGUI_DIR)
 CIMGUI_INC_DIR := $(CIMGUI_DIR)/generator/output
-CIMGUI_OUT := $(CIMGUI_DIR)/cimgui.a
+CIMGUI_OUT := $(CIMGUI_BIN_DIR)/cimgui.a
 
 IMGUI_DIR := $(CIMGUI_DIR)/imgui
 IMGUI_IMPL_SRC_DIR := $(IMGUI_DIR)/examples
@@ -68,9 +69,12 @@ IMGUI_IMPL_SRCS := $(IMGUI_IMPL_SRC_DIR)/imgui_impl_glfw.cpp $(IMGUI_IMPL_SRC_DI
 IMGUI_IMPL_OBJS := $(IMGUI_IMPL_SRCS:$(IMGUI_IMPL_SRC_DIR)/%.cpp=$(IMGUI_IMPL_OBJ_DIR)/%.o)
 IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -I$(INC_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_CUSTOM='<core/gl.h>'
 
-$(CIMGUI_OUT):
-	cd $(CIMGUI_DIR) && $(CMAKE) -DIMGUI_STATIC="yes"
-	make -C $(CIMGUI_DIR)
+$(CIMGUI_OUT): | $(CIMGUI_BIN_DIR)
+	cd $(CIMGUI_BIN_DIR) && $(CMAKE) ../../$(CIMGUI_DIR) -DIMGUI_STATIC="yes"
+	cd $(CIMGUI_BIN_DIR) && make
+
+$(CIMGUI_BIN_DIR):
+	$(MKDIR) $@
 
 $(IMGUI_IMPL_OBJS): $(IMGUI_IMPL_OBJ_DIR)/%.o : $(IMGUI_IMPL_SRC_DIR)/%.cpp | $(IMGUI_IMPL_OBJ_DIR)
 	$(CXX) -c $< -o $@ $(IMGUI_IMPL_CXXFLAGS)
@@ -115,7 +119,7 @@ clean:
 	$(RM) $(CORE_OUT) $(CORE_OBJS) $(CORE_DEPS) \
           $(GAME_OUT) $(GAME_OBJS) $(GAME_DEPS) \
           $(DESIGN_OUT) $(DESIGN_OBJS) $(DESIGN_DEPS) \
-          $(CIMGUI_OUT) $(IMGUI_IMPL_OBJS)
+          $(CIMGUI_BIN_DIR) $(IMGUI_IMPL_OBJS)
 
 # include the build generated dependency files
 # this allows make to detect changes to header files and recompile accordingly
