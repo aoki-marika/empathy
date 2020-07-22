@@ -54,7 +54,8 @@ struct texture_t
 
 /// Initialize the given texture from the given parameters.
 ///
-/// If the given usage is `TEXTURE_STATIC` and there is already another texture assigned to the given unit, then the existing one is overwritten.
+/// If the given texture unit was already assigned to another texture then that texture is overwritten,
+/// and `texture_bind(struct texture_t *)` must be called with it to restore it.
 /// The given unit is activated and the new texture is bound to it during this function.
 /// @param texture The texture to initialize.
 /// @param width The width, in pixels, of the new texture.
