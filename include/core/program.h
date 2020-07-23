@@ -2,6 +2,7 @@
 
 #include "shader.h"
 #include "texture.h"
+#include "matrix.h"
 
 ///
 /// Programs are used to manage OpenGL shader programs.
@@ -59,12 +60,26 @@ void program_deinit(struct program_t *program);
 /// @param program The program to use.
 void program_use(struct program_t *program);
 
-/// Set the given named sampler2D uniform of the given program to the given texture.
 ///
+/// All uniform setter functions follow the same rules and conventions,
+/// so they are summarised once here and not individually documented.
+///
+/// `program_set_[type](struct program_t, const char *, [value type] value)`:
+/// Set the given named [type] uniform of the given program to the given [value type].
+///
+/// If the given uniform name cannot be located within the given program then the program terminates.
 /// The given program is set to be used during this function.
 /// @param program The program to set the uniform of.
-/// @param name The name of the sampler2D uniform to set.
-/// @param texture The texture to set the given sampler2D uniform to.
-void program_set_sampler2d(struct program_t *program,
+/// @param name The name of the [type] uniform to set.
+/// @param value The [value type] to set the given [type] uniform to.
+///
+/// Note that [type] corresponds to the name of the GLSL type that the function sets.
+///
+
+void program_set_sampler2D(struct program_t *program,
                            const char *name,
-                           const struct texture_t *texture);
+                           const struct texture_t *value);
+
+void program_set_mat4(struct program_t *program,
+                      const char *name,
+                      const struct matrix4_t *value);

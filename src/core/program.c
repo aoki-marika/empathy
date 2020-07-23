@@ -10,7 +10,7 @@
 /// @param program The program to locate the uniform within.
 /// @param name The name of the uniform to locate.
 /// @return The unique OpenGL identifier of the given uniform's location within the given program.
-/// If the result is less than zero then the uniform could not be located.
+/// If the uniform could not be located then the program terminates.
 GLint program_locate_uniform(struct program_t *program, const char *name)
 {
     // check the cache to see if the given uniform was already located
@@ -21,10 +21,14 @@ GLint program_locate_uniform(struct program_t *program, const char *name)
             return uniform->location;
     }
 
-    // get the location, returning early if there was an error
+    // get the location
     GLint location = glGetUniformLocation(program->id, name);
     if (location < 0)
-        return location;
+    {
+        // the uniform could not be located, print the details and terminate
+        fprintf(stderr, "PROGRAM ERROR: could not locate uniform \"%s\" in program %u\n", name, program->id);
+        exit(EXIT_FAILURE);
+    }
 
     // ensure the cache isnt full, if it is then clear it
     if (program->num_cached_uniforms + 1 > PROGRAM_MAX_CACHED_UNIFORMS)
@@ -96,20 +100,22 @@ void program_use(struct program_t *program)
     glUseProgram(program->id);
 }
 
-void program_set_sampler2d(struct program_t *program,
+void program_set_sampler2D(struct program_t *program,
                            const char *name,
                            const struct texture_t *texture)
 {
-    // the program needs to be in use to set uniforms
-    // just to keep consistency its set regardless of whether or not the uniform is located
+    GLint location = program_locate_uniform(program, name);
     program_use(program);
 
-    // locate the uniform, returning early if it cannot be located
-    GLint location = program_locate_uniform(program, name);
-    if (location < 0)
-        return;
-
-    // set the uniform to the given textures unit
-    // sampler2d uniforms use unit indices instead of enum cases
+    // sampler2d uniforms use unit indices instead of enum cases, so convert before setting
     glUniform1i(location, texture->unit - GL_TEXTURE0);
+}
+
+void program_set_mat4(struct program_t *program,
+                      const char *name,
+                      const struct matrix4_t *matrix)
+{
+    GLint location = program_locate_uniform(program, name);
+    program_use(program);
+    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix->elements[0][0]);
 }
