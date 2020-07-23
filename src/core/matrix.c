@@ -58,8 +58,8 @@ struct matrix4_t matrix4_identity()
     );
 }
 
-struct matrix4_t matrix4_multiply(const struct matrix4_t *left,
-                                  const struct matrix4_t *right)
+struct matrix4_t matrix4_multiply(const struct matrix4_t left,
+                                  const struct matrix4_t right)
 {
     struct matrix4_t result = matrix4_zero();
     for (int column = 0; column < 4; column++)
@@ -68,7 +68,7 @@ struct matrix4_t matrix4_multiply(const struct matrix4_t *left,
         {
             float sum = 0;
             for (int i = 0; i < 4; i++)
-                sum += left->elements[i][row] * right->elements[column][i];
+                sum += left.elements[i][row] * right.elements[column][i];
 
             result.elements[column][row] = sum;
         }

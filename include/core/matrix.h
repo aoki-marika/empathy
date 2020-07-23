@@ -40,8 +40,8 @@ struct matrix4_t matrix4_identity();
 /// @param left The left-hand-side of the operation.
 /// @param right The right-hand-side of the operation.
 /// @return The result of multiplying the two given 4x4 matrices.
-struct matrix4_t matrix4_multiply(const struct matrix4_t *left,
-                                  const struct matrix4_t *right);
+struct matrix4_t matrix4_multiply(const struct matrix4_t left,
+                                  const struct matrix4_t right);
 
 /// Create and return a new orthographic projection matrix from the given parameters.
 /// @param left The coordinate of the left side of the projection.
