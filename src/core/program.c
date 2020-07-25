@@ -102,13 +102,11 @@ void program_use(struct program_t *program)
 
 void program_set_sampler2D(struct program_t *program,
                            const char *name,
-                           const struct texture_t *texture)
+                           unsigned int unit)
 {
     GLint location = program_locate_uniform(program, name);
     program_use(program);
-
-    // sampler2d uniforms use unit indices instead of enum cases, so convert before setting
-    glUniform1i(location, texture->unit - GL_TEXTURE0);
+    glUniform1i(location, unit);
 }
 
 void program_set_mat4(struct program_t *program,

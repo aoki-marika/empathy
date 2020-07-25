@@ -3,83 +3,81 @@
 #include "gl.h"
 
 ///
-/// Textures manage texture images which are uploaded to OpenGL and used when drawing.
+/// Textures manage every aspect of texture images; reading, decoding, and uploading/binding to graphics contexts.
 ///
-/// When creating a texture a texture unit is specified.
+/// When binding a texture a texture unit is specified.
 /// Using different units allows multiple textures to be used simultaneously in a single draw call or across multiple without re-binding.
 /// It is generally recommended to reserve a number of texture units to be "dynamic units" that will be re-bound many times.
-/// The remaining texture units can then be dedicated to large multiple-use textures like atlases.
+/// The remaining texture units can then be dedicated to large multiple-use textures like font atlases.
 ///
 
 // MARK: - Macros
 
-/// The maximum number of units available to textures.
-#define TEXTURE_MAX_UNIT 16
+/// The maximum number of texture units that textures can be uploaded to.
+#define TEXTURE_MAX_UNITS 16
 
-// MARK: - Enumerations
-
-/// The different formats that a single texture's data can be in.
-enum texture_format_t
-{
-    /// 8-bit unsigned red, green, and blue channels.
-    TEXTURE_RGBU8 = 0,
-
-    /// 8-bit unsigned red, green, blue, and alpha channels.
-    TEXTURE_RGBAU8 = 1,
-};
-
-/// The different filters used to scale up and down a single texture.
-enum texture_filter_t
-{
-    /// Nearest neighbour.
-    TEXTURE_NEAREST = 0,
-
-    /// Linear interpolation.
-    TEXTURE_LINEAR = 1,
-};
+/// The special texture unit used to initialize textures within.
+///
+/// OpenGL requires a unit to create a texture image, so this one is dedicated to that task.
+/// This unit can still be bound to by textures, though it is rarely recommended.
+#define TEXTURE_INIT_UNIT 0
 
 // MARK: - Data Structures
 
-/// A texture uploaded to OpenGL.
+/// A single texture image.
 struct texture_t
 {
-    /// The unique OpenGL identifier of this texture's backing.
-    GLuint id;
+    /// The width of this texture, in pixels.
+    unsigned int width;
 
-    /// The texture unit that this texture is using.
-    GLenum unit;
+    /// The height of this texture, in pixels.
+    unsigned int height;
+
+    /// The filter used to scale this texture up and down when drawing.
+    enum texture_scaling_t
+    {
+        /// Nearest neighbour.
+        TEXTURE_NEAREST = 0x0,
+
+        /// Linear interpolation.
+        TEXTURE_LINEAR = 0x1,
+    } scaling;
+
+    /// The unique OpenGL identifier of this texture.
+    GLuint id;
 };
 
 // MARK: - Functions
 
-/// Initialize the given texture from the given parameters.
+/// Initialize the given texture from the PNG file at the given offset within the file at the given filesystem path.
 ///
-/// If the given texture unit was already assigned to another texture then that texture is overwritten,
-/// and `texture_bind(struct texture_t *)` must be called with it to restore it.
-/// The given unit is activated and the new texture is bound to it during this function.
+/// The new texture is created within the current graphics context.
+/// If the given filesystem path cannot be opened then the program terminates.
+/// If the given offset within the given file is not a PNG file then then the program terminates.
+/// If the PNG within the given file at the given offset is invalid in any way then the program terminates.
+/// During this function the given file is read from disk, so this should only be called during load time.
+/// During this function the `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param texture The texture to initialize.
-/// @param width The width, in pixels, of the new texture.
-/// @param height The height, in pixels, of the new texture.
-/// @param format The format of the given texture data.
-/// @param filter The scaling filter for the new texture to use.
-/// @param data The texture data for the new texture.
-/// This data is assumed to be in left-to-right ordered rows ordered from bottom-to-top.
-/// @param unit The index of the texture unit for the new texture to use.
-/// This index must be less then `TEXTURE_MAX_UNIT`.
+/// @param path The filesystem path of the file containing the PNG file of the new texture.
+/// @param offset The absolute offset, within the given file, of the PNG file of the new texture.
+/// @param scaling The scaling filter for the new texture to use.
 void texture_init(struct texture_t *texture,
-                  unsigned int width,
-                  unsigned int height,
-                  enum texture_format_t format,
-                  enum texture_filter_t filter,
-                  unsigned int unit,
-                  const void *data);
+                  const char *path,
+                  long offset,
+                  enum texture_scaling_t scaling);
 
 /// Deinitialize the given texture, releasing all of it's allocated resources.
+///
+/// It is assumed that the graphics context which the given texture was created within is current during this function.
 /// @param texture The texture to deinitialize.
 void texture_deinit(struct texture_t *texture);
 
-/// Activate the given texture's texture unit and bind it to it.
+/// Bind the given texture to the given texture within the current graphics context.
 ///
-/// This only needs to be called when another texture binds to the given texture's unit.
+/// This function must be called at least once before the given texture can be used for drawing.
+/// This overwrites any previously bound texture within the given unit.
+/// If the given unit is greater than or equal to `TEXTURE_MAX_UNITS` then an assertion fails.
+/// During this function the given unit is activated and bound to.
 /// @param texture The texture to bind.
-void texture_bind(struct texture_t *texture);
+/// @param unit The unit to bind the given texture to.
+void texture_bind(struct texture_t *texture, unsigned int unit);

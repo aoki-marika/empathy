@@ -10,7 +10,7 @@ This project is split into several smaller components:
 
  - `core`: The internal engine library.
  - `game`: The end user game.
- - `design`: The developer program for creating interfaces.
+ - `design`: The developer program for creating assets.
 
 ### Building
 
@@ -21,6 +21,7 @@ Essentials:
 Dependencies:
  - `core`:
     - `libglfw3-dev`
+    - `libpng-dev`
  - `game`:
     - `core` (included)
  - `design`:

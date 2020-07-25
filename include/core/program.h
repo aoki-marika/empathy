@@ -78,7 +78,7 @@ void program_use(struct program_t *program);
 
 void program_set_sampler2D(struct program_t *program,
                            const char *name,
-                           const struct texture_t *value);
+                           unsigned int unit);
 
 void program_set_mat4(struct program_t *program,
                       const char *name,
