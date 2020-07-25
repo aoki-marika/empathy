@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gl.h"
+#include "png.h"
 
 ///
 /// Textures manage every aspect of texture images; reading, decoding, and uploading/binding to graphics contexts.
@@ -49,22 +50,13 @@ struct texture_t
 
 // MARK: - Functions
 
-/// Initialize the given texture from the PNG file at the given offset within the file at the given filesystem path.
-///
-/// The new texture is created within the current graphics context.
-/// If the given filesystem path cannot be opened then the program terminates.
-/// If the given offset within the given file is not a PNG file then then the program terminates.
-/// If the PNG within the given file at the given offset is invalid in any way then the program terminates.
-/// During this function the given file is read from disk, so this should only be called during load time.
-/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// Initialize the given texture with the contents of the given PNG, and the given parameters.
 /// @param texture The texture to initialize.
-/// @param path The filesystem path of the file containing the PNG file of the new texture.
-/// @param offset The absolute offset, within the given file, of the PNG file of the new texture.
+/// @param png The PNG containing the contents of the new texture.
 /// @param scaling The scaling filter for the new texture to use.
-void texture_init(struct texture_t *texture,
-                  const char *path,
-                  long offset,
-                  enum texture_scaling_t scaling);
+void texture_init_png(struct texture_t *texture,
+                      const struct png_t *png,
+                      enum texture_scaling_t scaling);
 
 /// Deinitialize the given texture, releasing all of it's allocated resources.
 ///

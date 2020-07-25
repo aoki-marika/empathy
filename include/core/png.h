@@ -2,11 +2,13 @@
 
 #include <stdio.h>
 
-#include "texture.h"
-
 ///
 /// Utility wrapper around working with PNG images.
 ///
+
+// MARK: - Forward Declarations
+
+struct texture_t;
 
 // MARK: - Data Structures
 

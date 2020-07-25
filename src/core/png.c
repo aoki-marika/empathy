@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <libpng/png.h>
 
+#include "texture.h"
+
 // MARK: - Functions
 
 void png_init_file(struct png_t *png, FILE *file)

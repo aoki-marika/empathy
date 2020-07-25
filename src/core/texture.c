@@ -1,19 +1,14 @@
 #include "texture.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
 
 #include "png.h"
 
 // MARK: - Functions
 
-/// Create the graphics representation of the given PNG and load it into the given texture.
-/// @param texture The texture to load the PNG's graphcis representation into.
-/// @param png The PNG to create the graphics representation of.
-void texture_create(struct texture_t *texture, struct png_t *png)
+void texture_init_png(struct texture_t *texture,
+                      const struct png_t *png,
+                      enum texture_scaling_t scaling)
 {
     // activate the init unit to bind the new texture to when creating it
     glActiveTexture(GL_TEXTURE0 + TEXTURE_INIT_UNIT);
@@ -60,34 +55,6 @@ void texture_create(struct texture_t *texture, struct png_t *png)
     texture->width = png->width;
     texture->height = png->height;
     texture->id = id;
-}
-
-void texture_init(struct texture_t *texture,
-                  const char *path,
-                  long offset,
-                  enum texture_scaling_t scaling)
-{
-    // open the given file
-    FILE *file = fopen(path, "rb");
-    if (file == NULL)
-    {
-        // the given path could not be opened, print the details and terminate
-        fprintf(stderr, "TEXTURE ERROR: could not open file \"%s\" (%s)\n", path, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    // initialize the given texture
-    texture->scaling = scaling;
-
-    // read the png and create the graphics representation within the given texture
-    struct png_t png;
-    fseek(file, offset, SEEK_SET);
-    png_init_file(&png, file);
-    texture_create(texture, &png);
-
-    // deinit everything only used for loading
-    png_deinit(&png);
-    fclose(file);
 }
 
 void texture_deinit(struct texture_t *texture)
