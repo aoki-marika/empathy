@@ -56,7 +56,7 @@ struct texture_t
 /// If the given offset within the given file is not a PNG file then then the program terminates.
 /// If the PNG within the given file at the given offset is invalid in any way then the program terminates.
 /// During this function the given file is read from disk, so this should only be called during load time.
-/// During this function the `TEXTURE_INIT_UNIT` is activated and bound to.
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param texture The texture to initialize.
 /// @param path The filesystem path of the file containing the PNG file of the new texture.
 /// @param offset The absolute offset, within the given file, of the PNG file of the new texture.

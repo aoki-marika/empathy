@@ -33,7 +33,7 @@ void png_init_file(struct png_t *png, FILE *file)
     //  - PNG_TRANSFORM_EXPAND: expand data to 24-bit rgb/32-bit rgba/8-bit greyscale/16-bit greyscale with alpha
     png_read_png(reader, info, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
-    // get the needed png file info
+    // read the header
     png_uint_32 width, height;
     int bit_depth, colour_type;
     png_get_IHDR(reader, info, &width, &height, &bit_depth, &colour_type, NULL, NULL, NULL);
@@ -70,6 +70,45 @@ void png_init_file(struct png_t *png, FILE *file)
 
     // close the png file
     png_destroy_read_struct(&reader, &info, NULL);
+}
+
+void png_init_texture(struct png_t *png,
+                      struct texture_t *texture,
+                      enum png_format_t png_format)
+{
+    // bind the given texture to read it
+    texture_bind(texture, TEXTURE_INIT_UNIT);
+
+    // get the opengl representations of the given format,
+    // and the size of each pixel
+    GLenum format, type;
+    size_t pixel_size;
+    switch (png_format)
+    {
+        case PNG_RGBU8:
+            format = GL_RGB;
+            type = GL_UNSIGNED_BYTE;
+            pixel_size = 3;
+            break;
+        case PNG_RGBAU8:
+            format = GL_RGBA;
+            type = GL_UNSIGNED_BYTE;
+            pixel_size = 4;
+            break;
+    }
+
+    // read the given textures image
+    unsigned int width = texture->width;
+    unsigned int height = texture->height;
+    size_t data_size = width * height * pixel_size;
+    void *data = malloc(data_size);
+    glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
+
+    // initialize the given png
+    png->width = texture->width;
+    png->height = texture->height;
+    png->format = png_format;
+    png->data = data;
 }
 
 void png_deinit(struct png_t *png)
