@@ -115,3 +115,54 @@ void png_deinit(struct png_t *png)
 {
     free(png->data);
 }
+
+void png_write(struct png_t *png, FILE *file)
+{
+    // open the png file for writing
+    png_structp writer = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_infop info = png_create_info_struct(writer);
+    setjmp(png_jmpbuf(writer));
+    png_init_io(writer, file);
+
+    // get the png representations of the given pngs format,
+    // and calculate the size of each row for it, in bytes
+    int bit_depth, colour_type;
+    size_t row_size;
+    switch (png->format)
+    {
+        case PNG_RGBU8:
+            bit_depth = 8;
+            colour_type = PNG_COLOR_TYPE_RGB;
+            row_size = png->width * 3;
+            break;
+        case PNG_RGBAU8:
+            bit_depth = 8;
+            colour_type = PNG_COLOR_TYPE_RGBA;
+            row_size = png->width * 4;
+            break;
+    }
+
+    // write the header
+    png_set_IHDR(writer,
+                 info,
+                 png->width,
+                 png->height,
+                 bit_depth,
+                 colour_type,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_BASE);
+
+    png_write_info(writer, info);
+
+    // write the data
+    // the rows need to be flipped back to top-to-bottom
+    for (int row = 0; row < png->height; row++)
+        png_write_row(writer, png->data + (((png->height - 1) - row) * row_size));
+
+    // write the footer
+    png_write_end(writer, NULL);
+
+    // close the png file
+    png_destroy_write_struct(&writer, &info);
+}

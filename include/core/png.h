@@ -60,3 +60,8 @@ void png_init_texture(struct png_t *png,
 /// Deinitialize the given PNG, releasing all of it's allocated resources.
 /// @param png The PNG to deinitialize.
 void png_deinit(struct png_t *png);
+
+/// Write the given PNG to the current cursor of the given file handle.
+/// @param png The PNG to write.
+/// @param file The file handle to write the PNG file to.
+void png_write(struct png_t *png, FILE *file);
