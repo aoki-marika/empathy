@@ -74,27 +74,27 @@ void png_init_file(struct png_t *png, FILE *file)
     png_destroy_read_struct(&reader, &info, NULL);
 }
 
-void png_init_texture(struct png_t *png,
-                      struct texture_t *texture,
-                      enum png_format_t png_format)
+void png_init_texture(struct png_t *png, struct texture_t *texture)
 {
     // bind the given texture to read it
     texture_bind(texture, TEXTURE_INIT_UNIT);
 
-    // get the opengl representations of the given format,
-    // and the size of each pixel
-    GLenum format, type;
+    // get the opengl and png representations and pixel size of the given textures format
+    GLenum gl_format, gl_type;
+    enum png_format_t png_format;
     size_t pixel_size;
-    switch (png_format)
+    switch (texture->format)
     {
-        case PNG_RGBU8:
-            format = GL_RGB;
-            type = GL_UNSIGNED_BYTE;
+        case TEXTURE_RGBU8:
+            gl_format = GL_RGB;
+            gl_type = GL_UNSIGNED_BYTE;
+            png_format = PNG_RGBU8;
             pixel_size = 3;
             break;
-        case PNG_RGBAU8:
-            format = GL_RGBA;
-            type = GL_UNSIGNED_BYTE;
+        case TEXTURE_RGBAU8:
+            gl_format = GL_RGBA;
+            gl_type = GL_UNSIGNED_BYTE;
+            png_format = PNG_RGBAU8;
             pixel_size = 4;
             break;
     }
@@ -104,7 +104,7 @@ void png_init_texture(struct png_t *png,
     unsigned int height = texture->height;
     size_t data_size = width * height * pixel_size;
     void *data = malloc(data_size);
-    glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
+    glGetTexImage(GL_TEXTURE_2D, 0, gl_format, gl_type, data);
 
     // initialize the given png
     png->width = texture->width;

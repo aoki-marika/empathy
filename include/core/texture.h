@@ -44,6 +44,16 @@ struct texture_t
         TEXTURE_LINEAR = 0x1,
     } scaling;
 
+    /// The format of this texture's data.
+    enum texture_format_t
+    {
+        /// 8-bit unsigned red, green, and blue channels.
+        TEXTURE_RGBU8,
+
+        /// 8-bit unsigned red, green, blue, and alpha channels.
+        TEXTURE_RGBAU8,
+    } format;
+
     /// The unique OpenGL identifier of this texture.
     GLuint id;
 };

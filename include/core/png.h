@@ -49,15 +49,12 @@ struct png_t
 /// @param file The file handle to read the PNG file from.
 void png_init_file(struct png_t *png, FILE *file);
 
-/// Initialize the given PNG from the contents of the given texture, in the given format.
+/// Initialize the given PNG with the contents of the given texture.
 ///
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param png The PNG to initialize.
 /// @param texture The texture to use the contents of for the new PNG.
-/// @param format The format to use for the new PNG.
-void png_init_texture(struct png_t *png,
-                      struct texture_t *texture,
-                      enum png_format_t format);
+void png_init_texture(struct png_t *png, struct texture_t *texture);
 
 /// Deinitialize the given PNG, releasing all of it's allocated resources.
 /// @param png The PNG to deinitialize.
