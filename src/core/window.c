@@ -5,10 +5,11 @@
 void window_init(struct window_t *window,
                  unsigned int width,
                  unsigned int height,
-                 const char *title)
+                 const char *title,
+                 bool is_resizable)
 {
     // create the window
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, (is_resizable) ? GLFW_TRUE : GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

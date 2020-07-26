@@ -44,17 +44,20 @@ struct window_t
 
 /// Initialize the given window with the given parameters.
 ///
-/// The new window will not be resizable.
 /// The new window always contains an OpenGL 3.3 core graphics context.
 /// During this function the new window is set as the current window for the calling thread.
 /// @param window The window to initialize.
 /// @param width The width of the new window, in pixels.
 /// @param height The height of the new window, in pixels.
 /// @param title The title of the new window.
+/// @param resizable Whether or not the new window should be resizable.
+/// Although the window can be resized, the framebuffer will always be the same given resolution,
+/// and the viewport will not be changed.
 void window_init(struct window_t *window,
                  unsigned int width,
                  unsigned int height,
-                 const char *title);
+                 const char *title,
+                 bool is_resizable);
 
 /// Deinitialize the given window, releasing all of it's allocated resources.
 /// @param window The window to deinitialize.
