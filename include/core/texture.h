@@ -70,6 +70,24 @@ void texture_init_png(struct texture_t *texture,
                       const struct png_t *png,
                       enum texture_scaling_t scaling);
 
+/// Initialize the given texture with an empty texture image from the given parameters.
+///
+/// The new texture image is filled with zeroes, so depending on the format the outcome will be different:
+///  - `TEXTURE_RGBU8`: Solid black.
+///  - `TEXTURE_RGBAU8`: Transparent.
+///
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// @param texture The texture to initialize.
+/// @param width The width of the new texture.
+/// @param height The height of the new texture.
+/// @param scaling The scaling filter for the new texture to use.
+/// @param format The format of the new texture's data.
+void texture_init_empty(struct texture_t *texture,
+                        unsigned int width,
+                        unsigned int height,
+                        enum texture_scaling_t scaling,
+                        enum texture_format_t format);
+
 /// Deinitialize the given texture, releasing all of it's allocated resources.
 ///
 /// It is assumed that the graphics context which the given texture was created within is current during this function.

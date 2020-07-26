@@ -1,5 +1,7 @@
 #include "texture.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "png.h"
@@ -86,6 +88,37 @@ void texture_init_png(struct texture_t *texture,
     texture->scaling = scaling;
     texture->format = texture_format;
     texture->id = id;
+}
+
+void texture_init_empty(struct texture_t *texture,
+                        unsigned int width,
+                        unsigned int height,
+                        enum texture_scaling_t scaling,
+                        enum texture_format_t format)
+{
+    // get the size of each pixel
+    size_t pixel_size;
+    switch (format)
+    {
+        case TEXTURE_RGBU8:  pixel_size = 3; break;
+        case TEXTURE_RGBAU8: pixel_size = 4; break;
+    }
+
+    // create the empty data
+    size_t data_size = width * height * pixel_size;
+    void *data = malloc(data_size);
+    memset(data, 0x0, data_size);
+
+    // create the new texture and initialize the given texture
+    GLuint id = texture_create(width, height, scaling, format, data);
+    texture->width = width;
+    texture->height = height;
+    texture->scaling = scaling;
+    texture->format = format;
+    texture->id = id;
+
+    // free the empty data as its now uploaded
+    free(data);
 }
 
 void texture_deinit(struct texture_t *texture)
