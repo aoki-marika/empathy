@@ -45,6 +45,12 @@ struct ast_t
     /// Allocated.
     struct ast_atlas_t
     {
+        /// The width of this atlas' texture, in pixels.
+        unsigned int width;
+
+        /// The height of this atlas' texture, in pixels.
+        unsigned int height;
+
         /// The filter used when scaling this atlas' texture up and down.
         enum texture_scaling_t scaling;
 
@@ -71,6 +77,16 @@ struct ast_t
 
         /// The top right UV coordinates of this sprite's bounds.
         struct uv_t top_right;
+
+        /// The width of this sprite, in pixels.
+        ///
+        /// This is unused when this sprite is written, as it is calculated beforehand.
+        unsigned int width;
+
+        /// The height of this sprite, in pixels.
+        ///
+        /// This is unused when this sprite is written, as it is calculated beforehand.
+        unsigned int height;
     } *sprites;
 };
 
@@ -101,6 +117,7 @@ void ast_atlas_read(struct ast_t *ast, unsigned int index, struct texture_t *tex
 
 /// Write the given atlas set contents to an atlas set file at the current cursor of the given file handle.
 ///
+/// If the atlas index of any of the given sprites is out of bounds of the given atlases then an assertion fails.
 /// During this function the cursor of the given file handle is changed.
 /// @param file The file handle to write the given set contents to.
 /// @param num_atlases The total number of given atlases.

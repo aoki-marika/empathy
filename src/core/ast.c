@@ -22,9 +22,12 @@
 /// The size of an atlas within an atlas set file, in bytes.
 ///
 ///  - U8 texture scaling.
-///  - U8 `0x00` padding. (x3)
+///  - U8 `0x00` padding.
+///  - U16 texture width.
+///  - U16 texture height.
+///  - U8 `0x00` padding. (x2)
 ///  - U32 PNG pointer.
-#define AST_ATLAS_SIZE 8
+#define AST_ATLAS_SIZE 12
 
 /// The size of a sprite within an atlas set file, in bytes.
 ///
@@ -35,7 +38,9 @@
 ///  - F32 bottom-left V coordinate.
 ///  - F32 top-right U coordinate.
 ///  - F32 top-right V coordinate.
-#define AST_SPRITE_SIZE 68
+///  - U16 pixel width.
+///  - U16 pixel height.
+#define AST_SPRITE_SIZE 72
 
 // MARK: - Functions
 
@@ -73,12 +78,16 @@ void ast_init(struct ast_t *ast, const char *path)
         fseek(file, atlases_pointer + (i * 8), SEEK_SET);
         enum texture_scaling_t scaling = bin_read_u8(file);
         assert(bin_read_u8(file) == 0x0);
+        unsigned int width = bin_read_u16(file);
+        unsigned int height = bin_read_u16(file);
         assert(bin_read_u8(file) == 0x0);
         assert(bin_read_u8(file) == 0x0);
         long png_pointer = (long)bin_read_u32(file);
 
         // initialzie the current atlas
         struct ast_atlas_t *atlas = &atlases[i];
+        atlas->width = width;
+        atlas->height = height;
         atlas->scaling = scaling;
         atlas->png_pointer = png_pointer;
     }
@@ -98,6 +107,8 @@ void ast_init(struct ast_t *ast, const char *path)
         float bottom_left_v = bin_read_f32(file);
         float top_right_u = bin_read_f32(file);
         float top_right_v = bin_read_f32(file);
+        unsigned int width = bin_read_u16(file);
+        unsigned int height = bin_read_u16(file);
 
         // initialize the current sprite
         struct ast_sprite_t *sprite = &sprites[i];
@@ -107,6 +118,8 @@ void ast_init(struct ast_t *ast, const char *path)
         sprite->bottom_left.v = bottom_left_v;
         sprite->top_right.u = top_right_u;
         sprite->top_right.v = top_right_v;
+        sprite->width = width;
+        sprite->height = height;
     }
 
     // initialize the given set
@@ -181,6 +194,8 @@ void ast_write_contents(FILE *file,
         uint32_t png_pointer = stream_pointer + ftell(stream_file);
         bin_write_u8(atlas->scaling, file);
         bin_write_u8(0x0, file);
+        bin_write_u16(atlas->width, file);
+        bin_write_u16(atlas->height, file);
         bin_write_u8(0x0, file);
         bin_write_u8(0x0, file);
         bin_write_u32(png_pointer, file);
@@ -208,6 +223,12 @@ void ast_write_contents(FILE *file,
         bin_write_f32(sprite->bottom_left.v, file);
         bin_write_f32(sprite->top_right.u, file);
         bin_write_f32(sprite->top_right.v, file);
+
+        // calculate and write the pixel size
+        assert(sprite->atlas_index < num_atlases);
+        struct texture_t *atlas = &atlases[i];
+        bin_write_u16(atlas->width * (sprite->top_right.u - sprite->bottom_left.u), file);
+        bin_write_u16(atlas->height * (sprite->top_right.v - sprite->bottom_left.v), file);
     }
 
     // write and close the data stream
