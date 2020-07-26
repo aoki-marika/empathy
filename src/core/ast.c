@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include "bin.h"
+#include "png.h"
 
 // MARK: - Macros
 
@@ -121,6 +122,24 @@ void ast_deinit(struct ast_t *ast)
     free(ast->sprites);
     free(ast->atlases);
     fclose(ast->file);
+}
+
+void ast_atlas_read(struct ast_t *ast, unsigned int index, struct texture_t *texture)
+{
+    // get the given atlas, ensuring the index is valid
+    assert(index < ast->num_atlases);
+    struct ast_atlas_t *atlas = &ast->atlases[index];
+
+    // read the png
+    struct png_t png;
+    fseek(ast->file, atlas->png_pointer, SEEK_SET);
+    png_init_file(&png, ast->file);
+
+    // initialize the given texture
+    texture_init_png(texture, &png, atlas->scaling);
+
+    // deinitialize the png as its now loaded into the texture
+    png_deinit(&png);
 }
 
 void ast_write_contents(FILE *file,

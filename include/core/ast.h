@@ -88,6 +88,17 @@ void ast_init(struct ast_t *ast, const char *path);
 /// @param ast The set to deinitialize.
 void ast_deinit(struct ast_t *ast);
 
+/// Read the atlas at the given index within the given set into the given texture.
+///
+/// The atlas is read from disk, so this should only be called during load time.
+/// If the given atlas index is out of bounds of the given set then an assertion fails.
+/// During this function the given texture is initialized, so the caller is responsible for deinitializing it.
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// @param ast The set to read the atlas from.
+/// @param index The index of the atlas to read within the given set.
+/// @param texture The texture to read the given atlas into.
+void ast_atlas_read(struct ast_t *ast, unsigned int index, struct texture_t *texture);
+
 /// Write the given atlas set contents to an atlas set file at the current cursor of the given file handle.
 ///
 /// During this function the cursor of the given file handle is changed.
