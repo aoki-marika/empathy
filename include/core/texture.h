@@ -61,6 +61,8 @@ struct texture_t
 // MARK: - Functions
 
 /// Initialize the given texture with the contents of the given PNG, and the given parameters.
+///
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param texture The texture to initialize.
 /// @param png The PNG containing the contents of the new texture.
 /// @param scaling The scaling filter for the new texture to use.
