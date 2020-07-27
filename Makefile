@@ -14,6 +14,14 @@ RM := rm -rf
 MAKE := make
 CMAKE := cmake
 
+# debug flags
+# note that clean must be run when switching between debug and release
+# to ensure that everything is built with the new flags
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+	CFLAGS += -g -DDEBUG
+endif
+
 # core
 CORE_DIR := core
 CORE_INC_DIR := $(INC_DIR)/$(CORE_DIR)

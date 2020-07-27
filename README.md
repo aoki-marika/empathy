@@ -27,3 +27,10 @@ Dependencies:
  - `design`:
     - `core` (included)
     - `cimgui` (included submodule)
+
+Each component can be built with `make [component] DEBUG=[0/1]` from the root of the project.
+If no `DEBUG` option is supplied then a release build is compiled.
+
+Build output can be deleted with `make clean`.
+
+**Note**: When switching between different `DEBUG` options `make clean` must be run to ensure that everything is rebuilt with the new flags.
