@@ -46,10 +46,9 @@ GLint program_locate_uniform(struct program_t *program, const char *name)
     char *name_copy = (char *)malloc(name_size * sizeof(char));
     strcpy(name_copy, name);
 
-    struct program_uniform_t uniform;
-    uniform.name = name_copy;
-    uniform.location = location;
-    program->cached_uniforms[program->num_cached_uniforms++] = uniform;
+    struct program_uniform_t *uniform = &program->cached_uniforms[program->num_cached_uniforms++];
+    uniform->name = name_copy;
+    uniform->location = location;
 
     // return the uniforms location
     return location;
