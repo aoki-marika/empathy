@@ -24,6 +24,9 @@ void framebuffer_init(struct framebuffer_t *framebuffer,
                            GL_TEXTURE_2D,
                            framebuffer->texture.id,
                            0);
+
+    // unbind the new framebuffer to ensure nothing is accidentally rendered to it
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void framebuffer_deinit(struct framebuffer_t *framebuffer)

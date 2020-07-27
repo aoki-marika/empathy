@@ -22,8 +22,8 @@ struct framebuffer_t
 
 /// Initialize the given framebuffer of the given size.
 ///
-/// During this function `TEXTURE_INIT_UNIT` as activated and bound to.
-/// During this function the new framebuffer is set as the render target.
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// During this function the current render target is reset.
 /// @param framebuffer The framebuffer to initialize.
 /// @param width The width, in pixels, of the new framebuffer's render texture.
 /// @param height The height, in pixels, of the new framebuffer's render texture.
