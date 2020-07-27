@@ -16,17 +16,17 @@ This project is split into several smaller components:
 
 Essentials:
  - `gcc`, `make`, and the C standard library are required for all targets.
- - `g++`, `cmake`, and the C++ standard library are required for `design` to build `cimgui`.
+ - `g++`, `cmake`, and the C++ standard library are required for all targets to build `cimgui`.
 
 Dependencies:
  - `core`:
-    - `libglfw3-dev`
-    - `libpng-dev`
+    - `cimgui` (included submodule)
+    - `libglfw3-dev` (`3.2.1-1`)
+    - `libpng-dev` (`1.6.36-6`)
  - `game`:
     - `core` (included)
  - `design`:
     - `core` (included)
-    - `cimgui` (included submodule)
 
 Each component can be built with `make [component] DEBUG=[0/1]` from the root of the project.
 If no `DEBUG` option is supplied then a release build is compiled.

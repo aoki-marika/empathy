@@ -4,10 +4,10 @@
 #include <cimgui.h>
 #include <cimgui_impl.h>
 
-#include <core/window.h>
+#include "window.h"
 
 ///
-/// Utility wrappers to make IMGUI usage more friendly.
+/// Utility wrapper to make IMGUI usage more friendly.
 ///
 
 // MARK: - Data Structures
