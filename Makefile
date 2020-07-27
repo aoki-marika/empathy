@@ -5,6 +5,7 @@ OBJ_DIR := $(BIN_DIR)/obj
 
 CC := gcc
 CXX := g++
+LD := $(CXX)
 CFLAGS := -I$(INC_DIR)
 LDFLAGS :=
 
@@ -93,7 +94,7 @@ GAME_LDFLAGS := $(CORE_LDFLAGS)
 GAME_OUT := $(BIN_DIR)/game
 
 $(GAME_OUT): $(GAME_OBJS) $(CORE_OUT) | $(BIN_DIR)
-	$(CC) $^ -o $@ $(GAME_LDFLAGS)
+	$(LD) $^ -o $@ $(GAME_LDFLAGS)
 
 $(GAME_OBJS): $(GAME_OBJ_DIR)/%.o : $(GAME_SRC_DIR)/%.c | $(GAME_OBJ_DIR)
 	$(CC) -MMD -c $< -o $@ $(GAME_CFLAGS)
@@ -114,7 +115,7 @@ DESIGN_LDFLAGS := $(CORE_LDFLAGS)
 DESIGN_OUT := $(BIN_DIR)/design
 
 $(DESIGN_OUT): $(DESIGN_OBJS) $(CORE_OUT) | $(BIN_DIR)
-	$(CXX) $^ -o $@ $(DESIGN_LDFLAGS)
+	$(LD) $^ -o $@ $(DESIGN_LDFLAGS)
 
 $(DESIGN_OBJS): $(DESIGN_OBJ_DIR)/%.o : $(DESIGN_SRC_DIR)/%.c | $(DESIGN_OBJ_DIR)
 	$(CC) -MMD -c $< -o $@ $(DESIGN_CFLAGS)

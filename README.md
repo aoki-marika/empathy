@@ -16,7 +16,7 @@ This project is split into several smaller components:
 
 Essentials:
  - `gcc`, `make`, and the C standard library are required for all targets.
- - `g++`, `cmake`, and the C++ standard library are required for all targets to build `cimgui`.
+ - `g++`, `cmake`, and the C++ standard library are required for all targets to build and link `cimgui`.
 
 Dependencies:
  - `core`:
