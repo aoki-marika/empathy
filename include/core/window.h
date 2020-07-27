@@ -93,7 +93,7 @@ void window_begin_frame(struct window_t *window);
 /// Begin the final render pass of the given window.
 ///
 /// This indicates to the graphics context to render to the screen instead of a framebuffer.
-/// During this function the given window's viewport is applied.
+/// During this function the given window's viewport is applied to the current graphics context.
 /// It is assumed that the given window is already current for the calling thread.
 /// @param window The window to begin the final render pass on.
 void window_begin_final_pass(struct window_t *window);

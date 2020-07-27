@@ -27,6 +27,9 @@ void framebuffer_init(struct framebuffer_t *framebuffer,
 
     // unbind the new framebuffer to ensure nothing is accidentally rendered to it
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // initialize the background
+    framebuffer->has_background = false;
 }
 
 void framebuffer_deinit(struct framebuffer_t *framebuffer)
@@ -35,9 +38,18 @@ void framebuffer_deinit(struct framebuffer_t *framebuffer)
     glDeleteFramebuffers(1, &framebuffer->id);
 }
 
+void framebuffer_set_background(struct framebuffer_t *framebuffer, struct colour4_t colour)
+{
+    framebuffer->has_background = true;
+    framebuffer->background_colour = colour;
+}
+
 void framebuffer_use(struct framebuffer_t *framebuffer)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
     glViewport(0, 0, framebuffer->texture.width, framebuffer->texture.height);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    if (framebuffer->has_background)
+        glClearBufferfv(GL_COLOR, 0, (float *)&framebuffer->background_colour);
 }
