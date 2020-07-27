@@ -75,7 +75,7 @@ void window_set_current(struct window_t *window);
 /// During this function the given window is set as the current window for the calling thread.
 /// @param window The window to set the background colour of.
 /// @param colour The colour to set the background colour to.
-void window_set_background(struct window_t *window, const struct colour_t *colour);
+void window_set_background(struct window_t *window, struct colour4_t colour);
 
 /// Get whether or not the given window was closed by the user.
 ///

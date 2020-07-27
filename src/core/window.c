@@ -52,10 +52,10 @@ void window_set_current(struct window_t *window)
     glfwMakeContextCurrent(window->backing);
 }
 
-void window_set_background(struct window_t *window, const struct colour_t *colour)
+void window_set_background(struct window_t *window, struct colour4_t colour)
 {
     window_set_current(window);
-    glClearColor(colour->r, colour->g, colour->b, colour->a);
+    glClearColor(colour.r, colour.g, colour.b, colour.a);
 }
 
 bool window_is_closed(struct window_t *window)
