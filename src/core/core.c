@@ -38,7 +38,10 @@ void core_deinit(struct core_t *core)
     glfwTerminate();
 }
 
-void core_poll_events(struct core_t *core)
+void core_poll_events(struct core_t *core, bool wait)
 {
-    glfwPollEvents();
+    if (wait)
+        glfwWaitEvents();
+    else
+        glfwPollEvents();
 }

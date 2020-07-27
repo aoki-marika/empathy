@@ -1,10 +1,11 @@
 #pragma once
 
+#include <stdbool.h>
+
 ///
-/// Core contexts are used to manage global core engine state.
-/// This is mostly used for initializing global C libraries like GLFW, which is shared across several other objects.
+/// Core contexts are the global state of the core engine, which most subsystems rely on.
 ///
-/// All core context functions, unless specified otherwise, must be called on the main thread only.
+/// Core contexts are not thread safe, and functions related to them should only be called on the main thread.
 ///
 
 // MARK: - Data Structures
@@ -20,7 +21,6 @@ struct core_t
 ///
 /// A program must initialize a single core context before using any part of the engine.
 /// Only one core context is intended to be created per-program, any more is undefined behaviour.
-/// This core context must then be deinitialized once engine usage is complete.
 /// @param core The core context to initialize.
 void core_init(struct core_t *core);
 
@@ -32,4 +32,5 @@ void core_deinit(struct core_t *core);
 ///
 /// This should be called at the beginning of each frame, before updating anything else.
 /// @param core The core context to poll for global events.
-void core_poll_events(struct core_t *core);
+/// @param wait Whether or not the current thread should sleep until new global events are queued.
+void core_poll_events(struct core_t *core, bool wait);
