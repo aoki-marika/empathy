@@ -67,6 +67,9 @@ struct instance_t
 
     /// The function used to render a single frame of this instance's program.
     instance_render_function_t render;
+
+    /// Whether or not this instance is currently running.
+    bool is_running;
 };
 
 // MARK: - Functions
@@ -83,6 +86,7 @@ struct instance_t
 /// It is expected that this window is available for the entire lifetime of the given instance.
 /// @param display_mode The display mode for thew instance to use.
 /// @param data The user data pointer to supply to the new instance's program's functions.
+/// This pointer must be able to be accessed from different threads.
 /// @param init The function to call to initialize the new instance's program.
 /// See `instance_init_function_t` for further documentation.
 /// @param deinit The function to call to deinitialize the new instance's program.
@@ -101,8 +105,7 @@ void instance_init(struct instance_t *instance,
 
 /// Deinitialize the given instance, releasing all of it's allocated resources.
 ///
-/// If the given instance has been run then it is expected that this is only called
-/// after the given instance is known to have terminated.
+/// If the given instance is currently running then the program terminates.
 /// @param instance The instance to deinitialize.
 void instance_deinit(struct instance_t *instance);
 

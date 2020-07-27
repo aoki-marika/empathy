@@ -1,5 +1,6 @@
 #include "instance.h"
 
+#include <stdlib.h>
 #include <pthread.h>
 
 // MARK: - Functions
@@ -38,6 +39,9 @@ void *instance_run_internal(void *argument)
 
     // deinitialize the given instances program
     instance->deinit(instance->data);
+
+    // mark the given instance as finished
+    instance->is_running = false;
     return NULL;
 }
 
@@ -62,15 +66,29 @@ void instance_init(struct instance_t *instance,
     instance->init = init;
     instance->deinit = deinit;
     instance->render = render;
+    instance->is_running = false;
 }
 
 void instance_deinit(struct instance_t *instance)
 {
+    // ensure the given instance isnt running
+    // there would be unexpected results if the instance is running and deinitialized
+    if (instance->is_running)
+    {
+        // the given instance is running, print the details and terminate
+        fprintf(stderr, "INSTANCE ERROR: tried to deinitialize running instance %p\n", instance);
+        exit(EXIT_FAILURE);
+    }
+
     framebuffer_deinit(&instance->framebuffer);
 }
 
 void instance_run(struct instance_t *instance)
 {
+    // mark the given instance as running
+    // done here instead of the thread to avoid a race condition where the state is checked immediately after running
+    instance->is_running = true;
+
     // create the thread and actually run the given instance
     pthread_t thread;
     pthread_create(&thread, NULL, instance_run_internal, instance);
