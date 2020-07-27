@@ -38,5 +38,6 @@ void framebuffer_deinit(struct framebuffer_t *framebuffer)
 void framebuffer_use(struct framebuffer_t *framebuffer)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
+    glViewport(0, 0, framebuffer->texture.width, framebuffer->texture.height);
     glClear(GL_COLOR_BUFFER_BIT);
 }

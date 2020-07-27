@@ -13,6 +13,8 @@ void window_init(struct window_t *window,
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    window->width = width;
+    window->height = height;
     window->backing = glfwCreateWindow(width, height, title, NULL, NULL);
 
     // configure opengl
@@ -45,6 +47,13 @@ bool window_is_closed(struct window_t *window)
 void window_begin_frame(struct window_t *window)
 {
     window_set_current(window);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void window_begin_final_pass(struct window_t *window)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, window->width, window->height);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

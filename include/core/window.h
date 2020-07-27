@@ -16,7 +16,9 @@
 ///  - Begin the new frame with `window_begin_frame(struct window_t *)`.
 ///     - This indicates to the graphics context to begin a new frame, clearing out any previous state.
 ///  - Poll the core context for global events.
+///  - If not using framebuffers, begin the final render pass with `window_begin_final_pass(struct window_t *)`.
 ///  - Draw the frame.
+//   - If using framebuffers, begin the final render pass with `window_begin_final_pass(struct window_t *)`, and draw the framebuffer
 ///  - End the new frame with `window_end_frame(struct window_t *)`.
 ///     - This pushes all the new state of the frame to the graphics context, and waits for the appropriate frame interval.
 ///
@@ -26,6 +28,12 @@
 /// A window on the desktop containing a graphics context.
 struct window_t
 {
+    /// The width of this window, in pixels.
+    unsigned int width;
+
+    /// The height of this window, in pixels.
+    unsigned int height;
+
     /// The backing GLFW window of this window.
     GLFWwindow *backing;
 };
@@ -81,6 +89,14 @@ bool window_is_closed(struct window_t *window);
 /// During this function the given window is set as the current window for the calling thread.
 /// @param window The window to begin the new frame in.
 void window_begin_frame(struct window_t *window);
+
+/// Begin the final render pass of the given window.
+///
+/// This indicates to the graphics context to render to the screen instead of a framebuffer.
+/// During this function the given window's viewport is applied.
+/// It is assumed that the given window is already current for the calling thread.
+/// @param window The window to begin the final render pass on.
+void window_begin_final_pass(struct window_t *window);
 
 /// End the current frame and display it within the given window.
 ///
