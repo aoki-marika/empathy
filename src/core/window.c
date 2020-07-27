@@ -19,31 +19,10 @@ void window_init(struct window_t *window,
     window_set_current(window);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // create and bind the framebuffer and its texture
-    glGenFramebuffers(1, &window->framebuffer_id);
-    glBindFramebuffer(GL_FRAMEBUFFER, window->framebuffer_id);
-
-    texture_init_empty(&window->framebuffer_texture,
-                       width,
-                       height,
-                       TEXTURE_LINEAR,
-                       TEXTURE_RGBU8);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D,
-                           window->framebuffer_texture.id,
-                           0);
-
-    // unbind the framebuffer so nothing is accidentally rendered into it
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void window_deinit(struct window_t *window)
 {
-    texture_deinit(&window->framebuffer_texture);
-    glDeleteFramebuffers(1, &window->framebuffer_id);
     glfwDestroyWindow(window->backing);
 }
 
@@ -66,13 +45,6 @@ bool window_is_closed(struct window_t *window)
 void window_begin_frame(struct window_t *window)
 {
     window_set_current(window);
-    glBindFramebuffer(GL_FRAMEBUFFER, window->framebuffer_id);
-    glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void window_begin_framebuffer_draw(struct window_t *window)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
