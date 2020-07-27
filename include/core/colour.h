@@ -7,7 +7,7 @@
 // MARK: - Data Structures
 
 /// An RGBA colour.
-struct colour_t
+struct colour4_t
 {
     /// The normalized red component of this colour.
     float r;
@@ -21,3 +21,11 @@ struct colour_t
     /// The normalized alpha component of this colour.
     float a;
 };
+
+// MARK: - Functions
+
+/// Construct and return a new RGBA colour from the given components.
+///
+/// See `struct colour4_t` for parameter documentation.
+/// @return The new RGBA colour from the given components.
+struct colour4_t colour4(float r, float g, float b, float a);
