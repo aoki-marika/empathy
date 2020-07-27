@@ -73,7 +73,7 @@ void instance_deinit(struct instance_t *instance)
 {
     // ensure the given instance isnt running
     // there would be unexpected results if the instance is running and deinitialized
-    if (instance->is_running)
+    if (instance_is_running(instance))
     {
         // the given instance is running, print the details and terminate
         fprintf(stderr, "INSTANCE ERROR: tried to deinitialize running instance %p\n", instance);
@@ -81,6 +81,11 @@ void instance_deinit(struct instance_t *instance)
     }
 
     framebuffer_deinit(&instance->framebuffer);
+}
+
+bool instance_is_running(struct instance_t *instance)
+{
+    return instance->is_running;
 }
 
 void instance_run(struct instance_t *instance)

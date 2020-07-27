@@ -109,6 +109,11 @@ void instance_init(struct instance_t *instance,
 /// @param instance The instance to deinitialize.
 void instance_deinit(struct instance_t *instance);
 
+/// Get whether or not the given instance is currently running.
+/// @param instance The instance to check.
+/// @return Whether or not the given instance is currently running.
+bool instance_is_running(struct instance_t *instance);
+
 /// Create a new thread and run the given instance within it.
 ///
 /// Once the given instance is run it cannot be stopped,
