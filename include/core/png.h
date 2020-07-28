@@ -31,7 +31,7 @@ struct png_t
         PNG_RGBAU8,
     } format;
 
-    /// The data of this PNG, in it's format.
+    /// The data of this PNG, in its format.
     ///
     /// Rows are ordered bottom-to-top.
     /// Allocated.
@@ -56,7 +56,7 @@ void png_init_file(struct png_t *png, FILE *file);
 /// @param texture The texture to use the contents of for the new PNG.
 void png_init_texture(struct png_t *png, struct texture_t *texture);
 
-/// Deinitialize the given PNG, releasing all of it's allocated resources.
+/// Deinitialize the given PNG, releasing all of its allocated resources.
 /// @param png The PNG to deinitialize.
 void png_deinit(struct png_t *png);
 

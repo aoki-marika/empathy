@@ -24,7 +24,7 @@ struct core_t
 /// @param core The core context to initialize.
 void core_init(struct core_t *core);
 
-/// Deinitialize the given core context, releasing all of it's allocated resources.
+/// Deinitialize the given core context, releasing all of its allocated resources.
 /// @param core The core context to deinitialize.
 void core_deinit(struct core_t *core);
 

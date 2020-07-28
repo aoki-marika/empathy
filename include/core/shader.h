@@ -43,6 +43,6 @@ struct shader_t
 /// @param source The shader source of the given type to compile into the new shader.
 void shader_init(struct shader_t *shader, enum shader_type_t type, const char *source);
 
-/// Deinitialize the given shader, releasing all of it's allocated resources.
+/// Deinitialize the given shader, releasing all of its allocated resources.
 /// @param shader The shader to deinitialize.
 void shader_deinit(struct shader_t *shader);

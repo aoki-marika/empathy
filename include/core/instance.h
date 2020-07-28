@@ -9,7 +9,7 @@
 /// The programs that run within instances are called "programs".
 /// Instances handle the frame loop and displaying the final framebuffer of their program,
 /// but the creator is responsible for implementing the program and global event polling.
-/// Each instance and it's program is initialized and run on it's own thread, so multiple can coexist at the same time across several windows,
+/// Each instance and its program is initialized and run on its own thread, so multiple can coexist at the same time across several windows,
 /// but the creator is responsible for managing the main thread's global event polling and termination.
 ///
 /// Instances have multiple "outputs", which define how the final framebuffer is displayed within the window:
@@ -134,7 +134,7 @@ void instance_init(struct instance_t *instance,
                    instance_program_render_function_t render,
                    struct instance_output_t output);
 
-/// Deinitialize the given instance, releasing all of it's allocated resources.
+/// Deinitialize the given instance, releasing all of its allocated resources.
 ///
 /// If the given instance's program is currently running then the program terminates.
 /// @param instance The instance to deinitialize.

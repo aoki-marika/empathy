@@ -52,7 +52,7 @@ void program_init(struct program_t *program,
                   unsigned int num_shaders,
                   const struct shader_t *shaders);
 
-/// Deinitialize the given program, releasing all of it's allocated resources.
+/// Deinitialize the given program, releasing all of its allocated resources.
 /// @param program The program to deinitialize.
 void program_deinit(struct program_t *program);
 

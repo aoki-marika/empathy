@@ -100,7 +100,7 @@ struct ast_t
 /// @param path The filesystem path of the set file to open.
 void ast_init(struct ast_t *ast, const char *path);
 
-/// Deinitialize the given atlas set, releasing all of it's allocated resources.
+/// Deinitialize the given atlas set, releasing all of its allocated resources.
 /// @param ast The set to deinitialize.
 void ast_deinit(struct ast_t *ast);
 

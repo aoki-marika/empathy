@@ -56,7 +56,7 @@ void window_init(struct window_t *window,
                  const char *title,
                  bool is_resizable);
 
-/// Deinitialize the given window, releasing all of it's allocated resources.
+/// Deinitialize the given window, releasing all of its allocated resources.
 /// @param window The window to deinitialize.
 void window_deinit(struct window_t *window);
 

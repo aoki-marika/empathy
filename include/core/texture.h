@@ -88,7 +88,7 @@ void texture_init_empty(struct texture_t *texture,
                         enum texture_scaling_t scaling,
                         enum texture_format_t format);
 
-/// Deinitialize the given texture, releasing all of it's allocated resources.
+/// Deinitialize the given texture, releasing all of its allocated resources.
 ///
 /// It is assumed that the graphics context which the given texture was created within is current during this function.
 /// @param texture The texture to deinitialize.

@@ -29,7 +29,7 @@ struct imgui_t
 /// @param window The window to create the new context within.
 void imgui_init(struct imgui_t *imgui, const struct window_t *window);
 
-/// Deinitialize the given IMGUI context, releasing all of it's allocated resources.
+/// Deinitialize the given IMGUI context, releasing all of its allocated resources.
 /// @param imgui The IMGUI context to deinitialize.
 void imgui_deinit(struct imgui_t *imgui);
 

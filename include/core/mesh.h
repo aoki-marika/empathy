@@ -13,7 +13,7 @@
 /// These components each represent a single "component" of each vertex; XYZ position, RGBA colour, UV coordinates, etc.
 /// Each component contains a number of "values", each representing one value of the component; X component of RGB, G component of RGBA, etc.
 /// Meshes are unaware of what these components are, they are only interested in the layout of the bytes.
-/// When drawing a mesh, each of it's components for each vertex are bound to an indexed vertex attribute, which can then be used by a shader program.
+/// When drawing a mesh, each of its components for each vertex are bound to an indexed vertex attribute, which can then be used by a shader program.
 ///
 
 // MARK: - Data Structures
@@ -77,7 +77,7 @@ void mesh_init(struct mesh_t *mesh,
                unsigned int num_components,
                const struct mesh_component_t *components);
 
-/// Deinitialize the given mesh, releasing all of it's allocated resources.
+/// Deinitialize the given mesh, releasing all of its allocated resources.
 /// @param mesh The mesh to deinitialize.
 void mesh_deinit(struct mesh_t *mesh);
 

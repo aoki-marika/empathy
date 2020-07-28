@@ -40,7 +40,7 @@ void framebuffer_init(struct framebuffer_t *framebuffer,
                       unsigned int width,
                       unsigned int height);
 
-/// Deinitialize the given framebuffer, releasing all of it's allocated resources.
+/// Deinitialize the given framebuffer, releasing all of its allocated resources.
 /// @param framebuffer The framebuffer to deinitialize.
 void framebuffer_deinit(struct framebuffer_t *framebuffer);
 
