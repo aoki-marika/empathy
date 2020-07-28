@@ -5,7 +5,9 @@
 #include "matrix.h"
 
 ///
-/// Programs are used to manage OpenGL shader programs.
+/// Programs are a set of graphical shaders which have been linked together to form a singular pipeline.
+///
+/// To draw with a program it must be used, which indicates to all the succeeding draw calls to draw with it.
 ///
 
 // MARK: - Macros
@@ -15,10 +17,10 @@
 
 // MARK: - Data Structures
 
-/// An OpenGL shader program.
+/// A graphical shader program.
 struct program_t
 {
-    /// Unique OpenGL identifier of this program's backing.
+    /// The unique OpenGL identifier of this program's backing.
     GLuint id;
 
     /// The total number of the currently cached uniform locations within this program.
@@ -27,12 +29,12 @@ struct program_t
     /// All the currently cached uniform locations within this program.
     struct program_uniform_t
     {
-        /// The name of this uniform within the program.
+        /// The name of this uniform within the containing program.
         ///
         /// Allocated.
         char *name;
 
-        /// The unique OpenGL identifier of this uniform's location within it's program.
+        /// The unique OpenGL identifier of this uniform's location within the containing program.
         GLuint location;
     } cached_uniforms[PROGRAM_MAX_CACHED_UNIFORMS];
 };
@@ -54,9 +56,9 @@ void program_init(struct program_t *program,
 /// @param program The program to deinitialize.
 void program_deinit(struct program_t *program);
 
-/// Set the given program to be used for drawing.
+/// Set the given program to be used for all succeeding draw calls.
 ///
-/// This must be called again if another program is set to be used.
+/// Only one program at a time can be set to be used.
 /// @param program The program to use.
 void program_use(struct program_t *program);
 

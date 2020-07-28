@@ -1,7 +1,7 @@
 #pragma once
 
 ///
-/// Data structures and utilities related to working with colours.
+/// Data structures and functions for working with RGBA colours.
 ///
 
 // MARK: - Data Structures

@@ -3,7 +3,10 @@
 #include "gl.h"
 
 ///
-/// Shaders are used to manage OpenGL vertex, fragment, and geometry shaders.
+/// Shaders are any kind of graphical shader, which can be attached to a program.
+///
+/// On their own shaders are only compiled shader source,
+/// they must be attached to a program to form a pipeline which can be used by draw calls.
 ///
 
 // MARK: - Enumerations
@@ -23,7 +26,7 @@ enum shader_type_t
 
 // MARK: - Data Structures
 
-/// An OpenGL shader.
+/// A graphical shader.
 struct shader_t
 {
     /// The unique OpenGL identifier of this shader's backing.
@@ -32,12 +35,12 @@ struct shader_t
 
 // MARK: - Functions
 
-/// Initialize the given shader by compiling the given GLSL source of the given type.
+/// Initialize the given shader by compiling the given shader source, of the given type.
 ///
 /// If there are any compilation errors then the program terminates.
 /// @param shader The shader to initialize.
 /// @param type The type of the new shader.
-/// @param source The GLSL source of the given type to compile into the new shader.
+/// @param source The shader source of the given type to compile into the new shader.
 void shader_init(struct shader_t *shader, enum shader_type_t type, const char *source);
 
 /// Deinitialize the given shader, releasing all of it's allocated resources.
