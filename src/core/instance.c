@@ -18,8 +18,8 @@ void *instance_run_internal(void *argument)
     window_set_current(instance->window);
 
     // initialize the given instances output and program
-    instance->output.init(instance->output.data);
-    instance->program.init(instance->program.data);
+    instance->output.init(instance, instance->output.data);
+    instance->program.init(instance, instance->program.data);
 
     // run the frame loop
     while (!window_is_closed(instance->window))
@@ -29,19 +29,19 @@ void *instance_run_internal(void *argument)
 
         // render the program frame
         framebuffer_use(&instance->framebuffer);
-        instance->program.render(instance->program.data, &instance->framebuffer);
+        instance->program.render(instance, instance->program.data, &instance->framebuffer);
 
         // render the output to the screen
         window_begin_final_pass(instance->window);
-        instance->output.render(instance->output.data, &instance->framebuffer);
+        instance->output.render(instance, instance->output.data, &instance->framebuffer);
 
         // draw the frame
         window_end_frame(instance->window);
     }
 
     // deinitialize the given instances output and program
-    instance->program.deinit(instance->program.data);
-    instance->output.deinit(instance->output.data);
+    instance->program.deinit(instance, instance->program.data);
+    instance->output.deinit(instance, instance->output.data);
 
     // mark the given instances program as finished
     instance->program.is_running = false;
@@ -55,7 +55,8 @@ void instance_init(struct instance_t *instance,
                    void *data,
                    instance_init_function_t init,
                    instance_deinit_function_t deinit,
-                   instance_program_render_function_t render)
+                   instance_program_render_function_t render,
+                   struct instance_output_t output)
 {
     // set the given window as current to ensure everything is created in the correct context
     window_set_current(window);
@@ -70,6 +71,9 @@ void instance_init(struct instance_t *instance,
     instance->program.deinit = deinit;
     instance->program.render = render;
     instance->program.is_running = false;
+
+    // initialize the given instances output
+    instance->output = output;
 }
 
 void instance_deinit(struct instance_t *instance)
