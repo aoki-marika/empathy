@@ -29,7 +29,7 @@ typedef void (* instance_deinit_function_t)(void *data);
 /// A function which is used to render a single frame of an instance's program.
 ///
 /// The given framebuffer is already set as the render target when this function is called,
-/// so if there is no intermediate framebuffer then it does not have to be set.
+/// so if there is no intermediate framebuffer then it does not have to be set before rendering.
 /// @param data The user data pointer supplied to the calling instance.
 /// @param framebuffer The final framebuffer to render the new frame to.
 /// This is the framebuffer that is rendered to the screen, so if this framebuffer is not rendered to then nothing is displayed.
