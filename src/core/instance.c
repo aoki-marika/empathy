@@ -5,11 +5,11 @@
 
 // MARK: - Functions
 
-/// Run the given instance on the current thread.
+/// Run the given instance's program on the current thread.
 ///
-/// This is the actual function which runs the instance,
+/// This is the actual function which runs the given instance's program,
 /// `instance_run(struct instance_t *)` is only a wrapper to create the thread.
-/// @param arguemnt The pointer to the instance to run.
+/// @param arguemnt The pointer to the instance to run the program of.
 void *instance_run_internal(void *argument)
 {
     struct instance_t *instance = (struct instance_t *)argument;
@@ -18,7 +18,7 @@ void *instance_run_internal(void *argument)
     window_set_current(instance->window);
 
     // initialize the given instances program
-    instance->init(instance->data);
+    instance->program.init(instance->program.data);
 
     // run the frame loop
     while (!window_is_closed(instance->window))
@@ -28,7 +28,7 @@ void *instance_run_internal(void *argument)
 
         // render the program frame
         framebuffer_use(&instance->framebuffer);
-        instance->render(instance->data, &instance->framebuffer);
+        instance->program.render(instance->program.data, &instance->framebuffer);
 
         // render the final framebuffer
         // TODO: render the final framebuffer
@@ -38,10 +38,10 @@ void *instance_run_internal(void *argument)
     }
 
     // deinitialize the given instances program
-    instance->deinit(instance->data);
+    instance->program.deinit(instance->program.data);
 
     // mark the given instance as finished
-    instance->is_running = false;
+    instance->program.is_running = false;
     return NULL;
 }
 
@@ -49,7 +49,6 @@ void instance_init(struct instance_t *instance,
                    struct window_t *window,
                    unsigned int render_width,
                    unsigned int render_height,
-                   enum instance_display_mode_t display_mode,
                    void *data,
                    instance_init_function_t init,
                    instance_deinit_function_t deinit,
@@ -61,22 +60,23 @@ void instance_init(struct instance_t *instance,
     // initialize the given instance
     instance->window = window;
     framebuffer_init(&instance->framebuffer, render_width, render_height);
-    instance->display_mode = display_mode;
-    instance->data = data;
-    instance->init = init;
-    instance->deinit = deinit;
-    instance->render = render;
-    instance->is_running = false;
+
+    // initialize the given instances program
+    instance->program.data = data;
+    instance->program.init = init;
+    instance->program.deinit = deinit;
+    instance->program.render = render;
+    instance->program.is_running = false;
 }
 
 void instance_deinit(struct instance_t *instance)
 {
-    // ensure the given instance isnt running
-    // there would be unexpected results if the instance is running and deinitialized
+    // ensure the given instances program isnt running
+    // there would be unexpected results if the program is running and the instance is deinitialized
     if (instance_is_running(instance))
     {
-        // the given instance is running, print the details and terminate
-        fprintf(stderr, "INSTANCE ERROR: tried to deinitialize running instance %p\n", instance);
+        // the given instances program is running, print the details and terminate
+        fprintf(stderr, "INSTANCE ERROR: tried to deinitialize instance %p of running program\n", instance);
         exit(EXIT_FAILURE);
     }
 
@@ -85,16 +85,16 @@ void instance_deinit(struct instance_t *instance)
 
 bool instance_is_running(struct instance_t *instance)
 {
-    return instance->is_running;
+    return instance->program.is_running;
 }
 
 void instance_run(struct instance_t *instance)
 {
-    // mark the given instance as running
+    // mark the given instances program as running
     // done here instead of the thread to avoid a race condition where the state is checked immediately after running
-    instance->is_running = true;
+    instance->program.is_running = true;
 
-    // create the thread and actually run the given instance
+    // create the thread and actually run the given instances program
     pthread_t thread;
     pthread_create(&thread, NULL, instance_run_internal, instance);
 }

@@ -6,12 +6,13 @@
 ///
 /// Instances are used to handle the lifetime and final rendering of a single instance of a program which uses core.
 ///
-/// Instances handle the frame loop and displaying the final framebuffer,
+/// The programs that run within instances are called "programs".
+/// Instances handle the frame loop and displaying the final framebuffer of their program,
 /// but the creator is responsible for implementing the program and global event polling.
-/// Each instance is initialized and run on it's own thread, so multiple can coexist at the same time across several windows,
+/// Each instance and it's program is initialized and run on it's own thread, so multiple can coexist at the same time across several windows,
 /// but the creator is responsible for managing the main thread's global event polling and termination.
 ///
-/// Instances have multiple "display modes", which define how the final framebuffer is displayed within the window.
+/// Instances have multiple "outputs", which define how the final framebuffer is displayed within the window:
 ///  - Fullscreen: The final framebuffer is drawn within the full bounds of the window, with no additional components.
 ///  - Debug: The final framebuffer is drawn within an IMGUI window, with various debugging tools displayed around it.
 ///
@@ -46,30 +47,26 @@ struct instance_t
     /// The final framebuffer that this instance renders to to be displayed.
     struct framebuffer_t framebuffer;
 
-    /// The display mode of this instance.
-    enum instance_display_mode_t
     {
-        /// Fill the window with the final framebuffer.
-        INSTANCE_FULLSCREEN = 0,
 
-        /// Draw the final framebuffer in an IMGUI window, with debugging tools.
-        INSTANCE_DEBUG = 1,
-    } display_mode;
+    /// The program of this instance.
+    struct instance_program_t
+    {
+        /// The user data pointer to supply to this program's functions.
+        void *data;
 
-    /// The user data pointer to supply to this instance's program's functions.
-    void *data;
+        /// The function used to initialize this program.
+        instance_init_function_t init;
 
-    /// The function used to initialize this instance's program.
-    instance_init_function_t init;
+        /// The function used to deinitialize this program.
+        instance_deinit_function_t deinit;
 
-    /// The function used to deinitialize this instance's program.
-    instance_deinit_function_t deinit;
+        /// The function used to render a single frame of this program.
+        instance_render_function_t render;
 
-    /// The function used to render a single frame of this instance's program.
-    instance_render_function_t render;
-
-    /// Whether or not this instance is currently running.
-    bool is_running;
+        /// Whether or not this program is currently running.
+        bool is_running;
+    } program;
 };
 
 // MARK: - Functions
@@ -84,7 +81,6 @@ struct instance_t
 /// @param render_height The height, in pixels, for the new instance to render at.
 /// @param window The window for the new instance to render to.
 /// It is expected that this window is available for the entire lifetime of the given instance.
-/// @param display_mode The display mode for thew instance to use.
 /// @param data The user data pointer to supply to the new instance's program's functions.
 /// This pointer must be able to be accessed from different threads.
 /// @param init The function to call to initialize the new instance's program.
@@ -97,7 +93,6 @@ void instance_init(struct instance_t *instance,
                    struct window_t *window,
                    unsigned int render_width,
                    unsigned int render_height,
-                   enum instance_display_mode_t display_mode,
                    void *data,
                    instance_init_function_t init,
                    instance_deinit_function_t deinit,
@@ -105,20 +100,20 @@ void instance_init(struct instance_t *instance,
 
 /// Deinitialize the given instance, releasing all of it's allocated resources.
 ///
-/// If the given instance is currently running then the program terminates.
+/// If the given instance's program is currently running then the program terminates.
 /// @param instance The instance to deinitialize.
 void instance_deinit(struct instance_t *instance);
 
-/// Get whether or not the given instance is currently running.
-/// @param instance The instance to check.
-/// @return Whether or not the given instance is currently running.
+/// Get whether or not the given instance's program is currently running.
+/// @param instance The instance to check the program of.
+/// @return Whether or not the given instance's program is currently running.
 bool instance_is_running(struct instance_t *instance);
 
-/// Create a new thread and run the given instance within it.
+/// Create a new thread and run the given instance's program within it.
 ///
-/// Once the given instance is run it cannot be stopped,
+/// Once the given instance's program is run it cannot be stopped,
 /// unless the user closes the given instance's window or the program is terminated.
 /// It is expected that the caller manages global event polling,
 /// if it does not then the given instance's window cannot be closed and will behave unexpectedly.
-/// @param instance The instance to run.
+/// @param instance The instance to run the program of.
 void instance_run(struct instance_t *instance);
