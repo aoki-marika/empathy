@@ -17,7 +17,8 @@ void *instance_run_internal(void *argument)
     // set the given window as current on this new thread
     window_set_current(instance->window);
 
-    // initialize the given instances program
+    // initialize the given instances output and program
+    instance->output.init(instance->output.data);
     instance->program.init(instance->program.data);
 
     // run the frame loop
@@ -30,17 +31,19 @@ void *instance_run_internal(void *argument)
         framebuffer_use(&instance->framebuffer);
         instance->program.render(instance->program.data, &instance->framebuffer);
 
-        // render the final framebuffer
-        // TODO: render the final framebuffer
+        // render the output to the screen
+        window_begin_final_pass(instance->window);
+        instance->output.render(instance->output.data, &instance->framebuffer);
 
         // draw the frame
         window_end_frame(instance->window);
     }
 
-    // deinitialize the given instances program
+    // deinitialize the given instances output and program
     instance->program.deinit(instance->program.data);
+    instance->output.deinit(instance->output.data);
 
-    // mark the given instance as finished
+    // mark the given instances program as finished
     instance->program.is_running = false;
     return NULL;
 }
@@ -52,7 +55,7 @@ void instance_init(struct instance_t *instance,
                    void *data,
                    instance_init_function_t init,
                    instance_deinit_function_t deinit,
-                   instance_render_function_t render)
+                   instance_program_render_function_t render)
 {
     // set the given window as current to ensure everything is created in the correct context
     window_set_current(window);

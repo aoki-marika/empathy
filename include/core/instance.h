@@ -19,11 +19,11 @@
 
 // MARK: - Type Definitions
 
-/// A function which is used to initialize an instance's program.
+/// A function which is used to initialize an instance's program or output.
 /// @param data The user data pointer supplied to the calling instance.
 typedef void (* instance_init_function_t)(void *data);
 
-/// A function which is used to deinitialize an instance's program.
+/// A function which is used to deinitialize an instance's program or output.
 /// @param data The user data pointer supplied to the calling instance.
 typedef void (* instance_deinit_function_t)(void *data);
 
@@ -34,7 +34,14 @@ typedef void (* instance_deinit_function_t)(void *data);
 /// @param data The user data pointer supplied to the calling instance.
 /// @param framebuffer The final framebuffer to render the new frame to.
 /// This is the framebuffer that is rendered to the screen, so if this framebuffer is not rendered to then nothing is displayed.
-typedef void (* instance_render_function_t)(void *data, struct framebuffer_t *framebuffer);
+typedef void (* instance_program_render_function_t)(void *data, struct framebuffer_t *framebuffer);
+
+/// A function which is used to render the final framebuffer of an instance's program to the screen.
+///
+/// The final pass has already begun when this function is called.
+/// @param data The user data pointer supplied to the calling instance.
+/// @param framebuffer The final framebuffer to draw.
+typedef void (* instance_output_render_function_t)(void *data, struct framebuffer_t *framebuffer);
 
 // MARK: - Data Structures
 
@@ -47,7 +54,21 @@ struct instance_t
     /// The final framebuffer that this instance renders to to be displayed.
     struct framebuffer_t framebuffer;
 
+    /// The output that this instance is using.
+    struct instance_output_t
     {
+        /// The user data pointer to supply to this output's functions.
+        void *data;
+
+        /// The function used to initialize this output.
+        instance_init_function_t init;
+
+        /// The function used to deinitialize this output.
+        instance_deinit_function_t deinit;
+
+        /// The function used to render a single frame of this output to the screen.
+        instance_program_render_function_t render;
+    } output;
 
     /// The program of this instance.
     struct instance_program_t
@@ -62,7 +83,7 @@ struct instance_t
         instance_deinit_function_t deinit;
 
         /// The function used to render a single frame of this program.
-        instance_render_function_t render;
+        instance_program_render_function_t render;
 
         /// Whether or not this program is currently running.
         bool is_running;
@@ -88,7 +109,7 @@ struct instance_t
 /// @param deinit The function to call to deinitialize the new instance's program.
 /// See `instance_deinit_function_t` for further documentation.
 /// @param render The function to call to render a single frame of the new instance's program.
-/// See `instance_render_function_t` for further documentation.
+/// See `instance_program_render_function_t` for further documentation.
 void instance_init(struct instance_t *instance,
                    struct window_t *window,
                    unsigned int render_width,
@@ -96,7 +117,7 @@ void instance_init(struct instance_t *instance,
                    void *data,
                    instance_init_function_t init,
                    instance_deinit_function_t deinit,
-                   instance_render_function_t render);
+                   instance_program_render_function_t render);
 
 /// Deinitialize the given instance, releasing all of it's allocated resources.
 ///
