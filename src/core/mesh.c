@@ -77,10 +77,10 @@ void mesh_init(struct mesh_t *mesh,
     }
 
     // initialize the mesh
-    mesh->num_indices = indices_size / sizeof(unsigned int);
     mesh->vertex_array_id = vertex_array_id;
     mesh->vertex_buffer_id = vertex_buffer_id;
     mesh->index_buffer_id = index_buffer_id;
+    mesh->num_indices = indices_size / sizeof(unsigned int);
 }
 
 void mesh_deinit(struct mesh_t *mesh)

@@ -7,10 +7,11 @@
 // MARK: - Functions
 
 /// Attempt to locate the given named uniform within the given program, and return the result.
+///
+/// If the given uniform could not be located then the program terminates.
 /// @param program The program to locate the uniform within.
 /// @param name The name of the uniform to locate.
 /// @return The unique OpenGL identifier of the given uniform's location within the given program.
-/// If the uniform could not be located then the program terminates.
 GLint program_locate_uniform(struct program_t *program, const char *name)
 {
     // check the cache to see if the given uniform was already located
