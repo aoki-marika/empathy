@@ -24,18 +24,18 @@ void *instance_run_internal(void *argument)
     // run the frame loop
     while (!window_is_closed(instance->window))
     {
-        // begin the frame
+        // begin the new frame
         window_begin_frame(instance->window);
 
-        // render the program frame
-        framebuffer_use(&instance->framebuffer);
-        instance->program.render(instance, instance->program.data, &instance->framebuffer);
+        // render the program frame to the final framebuffer
+        framebuffer_use(&instance->program.framebuffer);
+        instance->program.render(instance, instance->program.data, &instance->program.framebuffer);
 
-        // render the output to the screen
+        // render the final framebuffer to the screen
         window_begin_final_pass(instance->window);
-        instance->output.render(instance, instance->output.data, &instance->framebuffer);
+        instance->output.render(instance, instance->output.data, &instance->program.framebuffer);
 
-        // draw the frame
+        // draw the new frame to the screen
         window_end_frame(instance->window);
     }
 
@@ -63,9 +63,9 @@ void instance_init(struct instance_t *instance,
 
     // initialize the given instance
     instance->window = window;
-    framebuffer_init(&instance->framebuffer, render_width, render_height);
 
     // initialize the given instances program
+    framebuffer_init(&instance->program.framebuffer, render_width, render_height);
     instance->program.data = data;
     instance->program.init = init;
     instance->program.deinit = deinit;
@@ -87,7 +87,7 @@ void instance_deinit(struct instance_t *instance)
         exit(EXIT_FAILURE);
     }
 
-    framebuffer_deinit(&instance->framebuffer);
+    framebuffer_deinit(&instance->program.framebuffer);
 }
 
 bool instance_is_running(struct instance_t *instance)

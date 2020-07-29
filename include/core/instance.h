@@ -12,9 +12,9 @@
 /// Each instance and its program is initialized and run on its own thread, so multiple can coexist at the same time across several windows,
 /// but the creator is responsible for managing the main thread's global event polling and termination.
 ///
-/// Instances have multiple "outputs", which define how the final framebuffer is displayed within the window:
-///  - Debug: The final framebuffer is drawn within an IMGUI window, with various debugging tools displayed around it.
-///  - Fullscreen: The final framebuffer is drawn within the full bounds of the window, with no additional components.
+/// Instances have "outputs", which define how the final framebuffer is displayed within the window.
+/// See the respective `instance_output_*.h` headers for documentation on the included outputs.
+/// In addition to the included outputs, a custom output can also be implemented by constructing an `instance_output_t`.
 ///
 
 // MARK: - Type Definitions
@@ -57,18 +57,18 @@ typedef void (* instance_output_render_function_t)(struct instance_t *instance,
 
 // MARK: - Data Structures
 
-/// A single core program instance.
+/// A single program instance, with an output.
 struct instance_t
 {
-    /// The window which this instance renders in.
+    /// The window which this instance's program and output renders within.
     struct window_t *window;
-
-    /// The final framebuffer that this instance renders to to be displayed.
-    struct framebuffer_t framebuffer;
 
     /// The program of this instance.
     struct instance_program_t
     {
+        /// The final framebuffer that this program renders to to be displayed by the containing instance's output.
+        struct framebuffer_t framebuffer;
+
         /// The user data pointer to supply to this program's functions.
         void *data;
 
@@ -110,8 +110,8 @@ struct instance_t
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// During this function the current render target is reset.
 /// @param instance The instance to deinitialize.
-/// @param render_width The width, in pixels, for the new instance to render at.
-/// @param render_height The height, in pixels, for the new instance to render at.
+/// @param render_width The width, in pixels, for the new instance to render it's program at.
+/// @param render_height The height, in pixels, for the new instance to render it's program at.
 /// @param window The window for the new instance to render to.
 /// It is expected that this window is available for the entire lifetime of the given instance.
 /// @param data The user data pointer to supply to the new instance's program's functions.
