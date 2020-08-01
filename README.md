@@ -21,7 +21,7 @@ Essentials:
 Dependencies:
  - `core`:
     - `cimgui` (included submodule)
-    - `libglfw3-dev` (`3.2.1-1`)
+    - `libglfw3-dev` (`3.3.2-1`)
     - `libpng-dev` (`1.6.36-6`)
  - `game`:
     - `core` (included)
