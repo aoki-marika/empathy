@@ -42,10 +42,10 @@ GLint program_locate_uniform(struct program_t *program, const char *name)
 
     // cache the location
     // the string needs to be copied to an allocated region first to allow access later
-    // strlen is incremented to account for the terminator character
     size_t name_size = strlen(name) + 1;
     char *name_copy = (char *)malloc(name_size * sizeof(char));
-    strcpy(name_copy, name);
+    name_copy[0] = '\0';
+    strcat(name_copy, name);
 
     struct program_uniform_t *uniform = &program->cached_uniforms[program->num_cached_uniforms++];
     uniform->name = name_copy;

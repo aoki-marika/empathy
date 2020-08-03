@@ -160,7 +160,7 @@ bool controller_try_pair(struct controller_t *controller,
 /// Get the name of the gamepad that the given controller is currently paired to, if any.
 ///
 /// The returned pointer is only available while the gamepad is connected.
-/// @return The human-readable name of the gamepad that the given controller is currently paired to.
+/// @return The null-terminated human-readable name of the gamepad that the given controller is currently paired to.
 /// If the given controller is not currently paired then `NULL` is returned instead.
 const char *controller_get_name(struct controller_t *controller);
 
