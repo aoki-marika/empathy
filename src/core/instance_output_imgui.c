@@ -14,7 +14,8 @@ void instance_output_imgui_output_init(struct instance_t *instance,
     struct instance_output_imgui_t *output = (struct instance_output_imgui_t *)data;
 
     // init imgui
-    imgui_init(&output->imgui, instance->window);
+    // always use the same ini file as its very unlikely that one program will use multiple unique outputs
+    imgui_init(&output->imgui, instance->window, "output.ini");
 }
 
 /// The deinitialization function for an IMGUI instance output's backing.

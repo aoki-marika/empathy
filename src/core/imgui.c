@@ -1,17 +1,20 @@
 #include "imgui.h"
 
+#include "platform.h"
+
 // MARK: - Functions
 
-void imgui_init(struct imgui_t *imgui, const struct window_t *window)
+void imgui_init(struct imgui_t *imgui,
+                const struct window_t *window,
+                const char *ini_name)
 {
     // create the context
     struct ImGuiContext *context = igCreateContext(NULL);
     struct ImGuiIO *io = igGetIO();
 
-    // TODO: create the ini alongside the binary
-    // the default implementation uses cwd which is annoying when developing
-    // so for now it is disabled
-    io->IniFilename = NULL;
+    // get and set the ini path
+    char *ini_path = platform_get_relative_path(ini_name);
+    io->IniFilename = ini_path;
 
     // initialize imgui
     ImGui_ImplGlfw_InitForOpenGL(window->backing, true);
@@ -28,6 +31,9 @@ void imgui_deinit(struct imgui_t *imgui)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     igDestroyContext(imgui->context);
+
+    // the ini path is used at an undetermined time, so it must be released here
+    free(imgui->io->IniFilename);
 }
 
 void imgui_begin_frame(struct imgui_t *imgui)

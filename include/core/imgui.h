@@ -24,10 +24,14 @@ struct imgui_t
 
 // MARK: - Functions
 
-/// Initialize the given IMGUI context within the given window.
+/// Initialize the given IMGUI context within the given window, using the given INI file.
 /// @param imgui The IMGUI context to initialize.
 /// @param window The window to create the new context within.
-void imgui_init(struct imgui_t *imgui, const struct window_t *window);
+/// @param ini_name The name of the INI file used to maintain the state of the new IMGUI context across program executions.
+/// This is not the absolute path, but a path relative to a directory that is determined by the context.
+void imgui_init(struct imgui_t *imgui,
+                const struct window_t *window,
+                const char *ini_name);
 
 /// Deinitialize the given IMGUI context, releasing all of its allocated resources.
 /// @param imgui The IMGUI context to deinitialize.
