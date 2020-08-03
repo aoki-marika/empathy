@@ -84,12 +84,21 @@ bool controller_try_pair(struct controller_t *controller,
         {
             controller->is_paired = true;
             controller->gamepad = joystick;
+            controller->gamepad_name = glfwGetGamepadName(joystick);
             return true;
         }
     }
 
     // if this point is reached then no gamepad is pressing the given pair combo
     return false;
+}
+
+const char *controller_get_name(struct controller_t *controller)
+{
+    if (controller->is_paired)
+        return controller->gamepad_name;
+    else
+        return NULL;
 }
 
 void controller_update(struct controller_t *controller)

@@ -122,6 +122,11 @@ struct controller_t
     /// The unique GLFW identifier of the gamepad that this controller is currently paired to, if any.
     int gamepad;
 
+    /// The name of the gamepad that this controller is currently paired to, if any.
+    ///
+    /// The lifetime of this pointer is handled by GLFW, and is only available while the gamepad is connected.
+    const char *gamepad_name;
+
     /// Whether each of this controller's buttons are currently pressed or released.
     bool buttons[CONTROLLER_NUM_BUTTONS];
 
@@ -151,6 +156,13 @@ void controller_deinit(struct controller_t *controller);
 bool controller_try_pair(struct controller_t *controller,
                          unsigned int num_pair_buttons,
                          const enum controller_button_t *pair_buttons);
+
+/// Get the name of the gamepad that the given controller is currently paired to, if any.
+///
+/// The returned pointer is only available while the gamepad is connected.
+/// @return The human-readable name of the gamepad that the given controller is currently paired to.
+/// If the given controller is not currently paired then `NULL` is returned instead.
+const char *controller_get_name(struct controller_t *controller);
 
 /// Update the current state of the given controller.
 ///
