@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.h"
+#include "clock.h"
 #include "framebuffer.h"
 
 ///
@@ -69,6 +70,11 @@ struct instance_t
         /// The final framebuffer that this program renders to to be displayed by the containing instance's output.
         struct framebuffer_t framebuffer;
 
+        /// The clock that this program uses to track the duration of each frame.
+        ///
+        /// This clock is reset at the beginning of every frame.
+        struct clock_t frame_clock;
+
         /// The user data pointer to supply to this program's functions.
         void *data;
 
@@ -110,8 +116,8 @@ struct instance_t
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// During this function the current render target is reset.
 /// @param instance The instance to deinitialize.
-/// @param render_width The width, in pixels, for the new instance to render it's program at.
-/// @param render_height The height, in pixels, for the new instance to render it's program at.
+/// @param render_width The width, in pixels, for the new instance to render its program at.
+/// @param render_height The height, in pixels, for the new instance to render its program at.
 /// @param window The window for the new instance to render to.
 /// It is expected that this window is available for the entire lifetime of the given instance.
 /// @param data The user data pointer to supply to the new instance's program's functions.

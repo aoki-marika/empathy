@@ -27,9 +27,13 @@ void *instance_run_internal(void *argument)
         // begin the new frame
         window_begin_frame(instance->window);
 
-        // render the program frame to the final framebuffer
+        // render the program frame to the final framebuffer, timing the duration
         framebuffer_use(&instance->program.framebuffer);
+        clock_reset(&instance->program.frame_clock);
         instance->program.render(instance, instance->program.data, &instance->program.framebuffer);
+
+        // pause the frame clock to maintain the proper frame time, so it can be used in the output
+        clock_set_paused(&instance->program.frame_clock, true);
 
         // render the final framebuffer to the screen
         window_begin_final_pass(instance->window);
@@ -66,6 +70,7 @@ void instance_init(struct instance_t *instance,
 
     // initialize the given instances program
     framebuffer_init(&instance->program.framebuffer, render_width, render_height);
+    clock_init(&instance->program.frame_clock);
     instance->program.data = data;
     instance->program.init = init;
     instance->program.deinit = deinit;
@@ -87,6 +92,7 @@ void instance_deinit(struct instance_t *instance)
         exit(EXIT_FAILURE);
     }
 
+    clock_deinit(&instance->program.frame_clock);
     framebuffer_deinit(&instance->program.framebuffer);
 }
 

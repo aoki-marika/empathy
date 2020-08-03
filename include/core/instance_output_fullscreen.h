@@ -33,7 +33,7 @@ struct instance_output_fullscreen_t
     /// Managed by the backing output's functions.
     struct shader_t shaders[2];
 
-    /// The program that this output uses to render it's final framebuffer mesh.
+    /// The program that this output uses to render its final framebuffer mesh.
     ///
     /// Managed by the backing output's functions.
     struct program_t program;

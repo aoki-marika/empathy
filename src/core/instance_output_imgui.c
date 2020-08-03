@@ -97,11 +97,12 @@ void instance_output_imgui_tool_framerate_render(struct instance_output_imgui_t 
                                                  struct instance_output_imgui_tool_t *tool,
                                                  struct instance_t *instance)
 {
-    // get the frame rate and display it within a window
-    // TODO: measure program frame time, as imgui only measures frame rate
+    // get the program and screen frame time/rate and display it within a window
+    double program_frame_time = clock_get_time(&instance->program.frame_clock);
     float framerate = output->imgui.io->Framerate;
+    float frame_time = 1000 / framerate;
     igBegin("Frame Rate", &tool->is_open, ImGuiWindowFlags_NoResize);
-        igText("Average %.3f ms/frame (%.1f FPS)", 1000 / framerate, framerate);
+        igText("%.3f ms/program frame (%.3f ms/frame, %.1f FPS)", program_frame_time, frame_time, framerate);
     igEnd();
 }
 
