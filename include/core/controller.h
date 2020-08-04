@@ -79,22 +79,22 @@ enum controller_axis_t
 {
     /// X axis of the left analog stick.
     ///
-    /// `-1` is left, `0` is center, and `1` is right.
+    /// `-1` is left, `0` is centre, and `1` is right.
     CONTROLLER_LEFT_X = 0,
 
     /// Y axis of the left analog stick.
     ///
-    /// `-1` is top, `0` is center, and `1` is bottom.
+    /// `-1` is top, `0` is centre, and `1` is bottom.
     CONTROLLER_LEFT_Y,
 
     /// X axis of the right analog stick.
     ///
-    /// `-1` is left, `0` is center, and `1` is right.
+    /// `-1` is left, `0` is centre, and `1` is right.
     CONTROLLER_RIGHT_X,
 
     /// Y axis of the right analog stick.
     ///
-    /// `-1` is top, `0` is center, and `1` is bottom.
+    /// `-1` is top, `0` is centre, and `1` is bottom.
     CONTROLLER_RIGHT_Y,
 
     /// L2, or left trigger in XBox notation.
