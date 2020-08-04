@@ -1,5 +1,7 @@
 #include "imgui.h"
 
+#include <stdlib.h>
+
 #include "platform.h"
 
 // MARK: - Functions
@@ -21,6 +23,7 @@ void imgui_init(struct imgui_t *imgui,
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
     // intialize the given context
+    imgui->ini_path = ini_path;
     imgui->context = context;
     imgui->io = io;
 }
@@ -31,9 +34,7 @@ void imgui_deinit(struct imgui_t *imgui)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     igDestroyContext(imgui->context);
-
-    // the ini path is used at an undetermined time, so it must be released here
-    free(imgui->io->IniFilename);
+    free(imgui->ini_path);
 }
 
 void imgui_begin_frame(struct imgui_t *imgui)

@@ -15,6 +15,12 @@
 /// A single IMGUI context.
 struct imgui_t
 {
+    /// The absolute filesystem path to this IMGUI context's INI file.
+    ///
+    /// This pointer is kept within the context as IMGUI uses it at an unknown time,
+    /// so it must be released during the deinitializer.
+    char *ini_path;
+
     /// The backing context of this IMGUI context.
     struct ImGuiContext *context;
 
