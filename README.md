@@ -10,7 +10,6 @@ This project is split into several smaller components:
 
  - `core`: The internal engine library.
  - `game`: The end user game.
- - `design`: The developer program for creating assets.
 
 ### Building
 
@@ -24,8 +23,6 @@ Dependencies:
     - `libglfw3-dev` (`3.3.2-1`)
     - `libpng-dev` (`1.6.36-6`)
  - `game`:
-    - `core` (included)
- - `design`:
     - `core` (included)
 
 Each component can be built with `make [component] DEBUG=[0/1]` from the root of the project.
