@@ -1,6 +1,7 @@
 #pragma once
 
 #include "texture.h"
+#include "uv.h"
 
 ///
 /// Atlas Set (AST) is a binary file format for storing several texture atlases and the sub-textures within them.
@@ -20,16 +21,6 @@
 #define AST_ID_MAX_SIZE 48
 
 // MARK: - Data Structures
-
-/// A set of UV coordinates.
-struct uv_t
-{
-    /// The normalized U coordinate of these coordinates.
-    float u;
-
-    /// The normalized V coordinate of these coordinates.
-    float v;
-};
 
 /// An atlas set.
 struct ast_t

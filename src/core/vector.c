@@ -16,4 +16,3 @@ struct vector3_t vector3_zero()
 {
     return vector3(0, 0, 0);
 }
-
