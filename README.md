@@ -9,6 +9,7 @@ An experimental music game based on the concept of communicating music through g
 This project is split into several smaller components:
 
  - `core`: The internal engine library.
+ - `sys2d`: The 2D subsystem.
  - `game`: The end user game.
 
 ### Building
@@ -22,8 +23,11 @@ Dependencies:
     - `cimgui` (included submodule)
     - `libglfw3-dev` (`3.3.2-1`)
     - `libpng-dev` (`1.6.36-6`)
+ - `sys2d`:
+    - `core` (included)
  - `game`:
     - `core` (included)
+    - `sys2d` (included)
 
 Each component can be built with `make [component] DEBUG=[0/1]` from the root of the project.
 If no `DEBUG` option is supplied then a release build is compiled.

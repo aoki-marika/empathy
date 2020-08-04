@@ -81,6 +81,27 @@ $(CORE_OBJS): $(CORE_OBJ_DIR)/%.o : $(CORE_SRC_DIR)/%.c | $(CORE_OBJ_DIR)
 $(CORE_OBJ_DIR):
 	$(MKDIR) $@
 
+# sys2d
+SYS2D_DIR := sys2d
+SYS2D_INC_DIR := $(INC_DIR)/$(SYS2D_DIR)
+SYS2D_SRC_DIR := $(SRC_DIR)/$(SYS2D_DIR)
+SYS2D_OBJ_DIR := $(OBJ_DIR)/$(SYS2D_DIR)
+SYS2D_SRCS := $(wildcard $(SYS2D_SRC_DIR)/*.c)
+SYS2D_OBJS := $(SYS2D_SRCS:$(SYS2D_SRC_DIR)/%.c=$(SYS2D_OBJ_DIR)/%.o)
+SYS2D_DEPS := $(SYS2D_OBJS:%.o=%.d)
+SYS2D_CFLAGS := $(CFLAGS) -I$(SYS2D_INC_DIR)
+SYS2D_LDFLAGS := $(LDFLAGS)
+SYS2D_OUT := $(BIN_DIR)/libsys2d.a
+
+$(SYS2D_OUT): $(SYS2D_OBJS) | $(BIN_DIR)
+	$(AR) rcs $@ $^
+
+$(SYS2D_OBJS): $(SYS2D_OBJ_DIR)/%.o : $(SYS2D_SRC_DIR)/%.c | $(SYS2D_OBJ_DIR)
+	$(CC) -MMD -c $< -o $@ $(SYS2D_CFLAGS)
+
+$(SYS2D_OBJ_DIR):
+	$(MKDIR) $@
+
 # game
 GAME_DIR := game
 GAME_INC_DIR := $(INC_DIR)/$(GAME_DIR)
@@ -93,7 +114,7 @@ GAME_CFLAGS := $(CFLAGS) -I$(GAME_INC_DIR)
 GAME_LDFLAGS := $(CORE_LDFLAGS)
 GAME_OUT := $(BIN_DIR)/game
 
-$(GAME_OUT): $(GAME_OBJS) $(CORE_OUT) | $(BIN_DIR)
+$(GAME_OUT): $(GAME_OBJS) $(CORE_OUT) $(SYS2D_OUT) | $(BIN_DIR)
 	$(LD) $^ -o $@ $(GAME_LDFLAGS)
 
 $(GAME_OBJS): $(GAME_OBJ_DIR)/%.o : $(GAME_SRC_DIR)/%.c | $(GAME_OBJ_DIR)
@@ -106,6 +127,7 @@ $(GAME_OBJ_DIR):
 cimgui: $(CIMGUI_OBJS)
 imgui_impl: $(IMGUI_IMPL_OBJS)
 core: $(CORE_OUT)
+sys2d: $(SYS2D_OUT)
 game: $(GAME_OUT)
 design: $(DESIGN_OUT)
 all: cimgui imgui_impl core game design
@@ -118,11 +140,13 @@ clean:
 	$(RM) $(CIMGUI_MAKE_DIR) \
           $(IMGUI_IMPL_OBJS) \
           $(CORE_OUT) $(CORE_OBJS) $(CORE_DEPS) \
+          $(SYS2D_OUT) $(SYS2D_OBJS) $(SYS2D_DEPS) \
           $(GAME_OUT) $(GAME_OBJS) $(GAME_DEPS) \
           $(DESIGN_OUT) $(DESIGN_OBJS) $(DESIGN_DEPS)
 
 # include the build generated dependency files
 # this allows make to detect changes to header files and recompile accordingly
 -include $(CORE_DEPS)
+-include $(SYS2D_DEPS)
 -include $(GAME_DEPS)
 -include $(DESIGN_DEPS)
