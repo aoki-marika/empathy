@@ -104,21 +104,13 @@ void texture_init_empty(struct texture_t *texture,
         case TEXTURE_RGBAU8: pixel_size = 4; break;
     }
 
-    // create the empty data
-    size_t data_size = width * height * pixel_size;
-    void *data = malloc(data_size);
-    memset(data, 0x0, data_size);
-
     // create the new texture and initialize the given texture
-    GLuint id = texture_create(width, height, scaling, format, data);
+    GLuint id = texture_create(width, height, scaling, format, NULL);
     texture->width = width;
     texture->height = height;
     texture->scaling = scaling;
     texture->format = format;
     texture->id = id;
-
-    // free the empty data as its now uploaded
-    free(data);
 }
 
 void texture_deinit(struct texture_t *texture)
