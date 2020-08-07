@@ -147,6 +147,7 @@ void texture_init_png(struct texture_t *texture,
     // initialize the given texture
     texture->width = png->width;
     texture->height = png->height;
+    texture->type = type;
     texture->scaling = scaling;
     texture->format = format;
     texture->id = id;
@@ -225,6 +226,7 @@ void texture_init_png_array(struct texture_t *texture,
     // initialize the given texture
     texture->width = width;
     texture->height = height;
+    texture->type = type;
     texture->scaling = scaling;
     texture->format = array_format;
     texture->id = id;
@@ -257,6 +259,7 @@ void texture_init_empty(struct texture_t *texture,
     // initialize the given texture
     texture->width = width;
     texture->height = height;
+    texture->type = type;
     texture->scaling = scaling;
     texture->format = format;
     texture->id = id;
@@ -272,7 +275,11 @@ void texture_bind(struct texture_t *texture, unsigned int unit)
     // ensure the given unit it valid
     assert(unit < TEXTURE_MAX_UNITS);
 
+    // get the opengl target for the given textures type
+    GLenum gl_target;
+    texture_type_to_gl(texture->type, &gl_target);
+
     // activate and bind to the given unit
     texture_activate_unit(unit);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glBindTexture(gl_target, texture->id);
 }
