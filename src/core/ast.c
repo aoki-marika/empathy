@@ -170,6 +170,21 @@ void ast_get_texture(struct ast_t *ast,
         png_deinit(&pngs[i]);
 }
 
+const struct ast_sprite_t *ast_get_sprite(const struct ast_t *ast,
+                                          const char *id)
+{
+    // attempt to return the first sprite matching the given id within the given set
+    for (int i = 0; i < ast->num_sprites; i++)
+    {
+        const struct ast_sprite_t *sprite = &ast->sprites[i];
+        if (strcmp(sprite->id, id) == 0)
+            return sprite;
+    }
+
+    // if this point has been reached then no matching sprite was found
+    return NULL;
+}
+
 void ast_write_contents(FILE *file,
                         enum texture_scaling_t atlas_scaling,
                         unsigned int num_atlases,

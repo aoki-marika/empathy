@@ -115,7 +115,16 @@ void ast_deinit(struct ast_t *ast);
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param ast The set to get the atlas array texture of.
 /// @param texture The texture to initialize with the new atlas array texture.
-void ast_get_texture(struct ast_t *ast, struct texture_t *texture);
+void ast_get_texture(struct ast_t *ast,
+                     struct texture_t *texture);
+
+/// Attempt to get the sprite matching the given identifier from the given atlas set, if any.
+/// @param ast The atlas set to get the sprite from.
+/// @param id The unique identifier of the sprite to get within the given atlas set.
+/// @return A pointer to the sprite matching the given identifier within the given atlas set, if any.
+/// If multiple sprites within the given set match the given identifier then the first match is returned.
+const struct ast_sprite_t *ast_get_sprite(const struct ast_t *ast,
+                                          const char *id);
 
 /// Write the given atlas set contents to an atlas set file at the current cursor of the given file handle.
 ///
