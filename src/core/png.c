@@ -76,6 +76,9 @@ void png_init_file(struct png_t *png, FILE *file)
 
 void png_init_texture(struct png_t *png, struct texture_t *texture)
 {
+    // ensure the given texture is of a type which can be used for a png
+    assert(texture->type == TEXTURE_2D);
+
     // bind the given texture to read it
     texture_bind(texture, TEXTURE_INIT_UNIT);
 

@@ -49,9 +49,10 @@ struct png_t
 /// @param file The file handle to read the PNG file from.
 void png_init_file(struct png_t *png, FILE *file);
 
-/// Initialize the given PNG with the contents of the given texture.
+/// Initialize the given PNG with the contents of the given 2D texture.
 ///
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// If the given texture is not a 2D texture then an assertion fails.
 /// @param png The PNG to initialize.
 /// @param texture The texture to use the contents of for the new PNG.
 void png_init_texture(struct png_t *png, struct texture_t *texture);
