@@ -109,6 +109,14 @@ void program_set_sampler2D(struct program_t *program,
     glUniform1i(location, unit);
 }
 
+void program_set_sampler2DArray(struct program_t *program,
+                                const char *name,
+                                unsigned int unit)
+{
+    // sampler2d and sampler2darray use the same function, this only exists for consistency
+    program_set_sampler2D(program, name, unit);
+}
+
 void program_set_mat4(struct program_t *program,
                       const char *name,
                       const struct matrix4_t *matrix)
