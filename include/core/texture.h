@@ -4,7 +4,16 @@
 #include "png.h"
 
 ///
-/// Textures manage every aspect of texture images; reading, decoding, and uploading/binding to graphics contexts.
+/// Textures manage uploading texture images to graphics contexts and allowing usage of them.
+///
+/// When creating a texture it can be one of several types:
+///  - 2D: A grid of pixels on a two-dimensional plane.
+///        These are the default for most textures, and should generally be used unless an array is needed for optimizations.
+///  - 2D Array: An array of 2D textures, indexed by a third axis on the plane.
+///              These have many optimization usages such as accessing multiple textures within a single draw call or leaving more texture units available.
+///              However texture arrays come with the limitation that all textures are within the width and height of the array.
+///              UV coordinates are normalized to the array texture's size, and textures are placed within this size from UV 0,0.
+///              For this reason it is generally recommended, though not required, to have all textures within a texture array be the same size.
 ///
 /// When binding a texture a texture unit is specified.
 /// Using different units allows multiple textures to be used simultaneously in a single draw call or across multiple without re-binding.
@@ -34,6 +43,16 @@ struct texture_t
     /// The height of this texture, in pixels.
     unsigned int height;
 
+    /// The type of this texture.
+    enum texture_type_t
+    {
+        /// A two-dimensional texture.
+        TEXTURE_2D,
+
+        /// An array of two-dimensional textures indexed by a third axis on the plane.
+        TEXTURE_2D_ARRAY,
+    } type;
+
     /// The filter used to scale this texture up and down when drawing.
     enum texture_scaling_t
     {
@@ -60,26 +79,42 @@ struct texture_t
 
 // MARK: - Functions
 
-/// Initialize the given texture with the contents of the given PNG, and the given parameters.
+/// Initialize the given texture with a 2D texture from the given PNG and parameters.
 ///
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param texture The texture to initialize.
-/// @param png The PNG containing the contents of the new texture.
 /// @param scaling The scaling filter for the new texture to use.
+/// @param png The PNG to create the new texture from.
 void texture_init_png(struct texture_t *texture,
-                      const struct png_t *png,
-                      enum texture_scaling_t scaling);
+                      enum texture_scaling_t scaling,
+                      const struct png_t *png);
 
-/// Initialize the given texture with an empty texture image from the given parameters.
+/// Initialize the given texture with an array texture from the given parameters, populated with 2D textures from the given PNGs.
 ///
-/// The new texture image is filled with zeroes, so depending on the format the outcome will be different:
+/// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
+/// @param texture The texture to initialize.
+/// @param width The width of the new array texture, in pixels.
+/// @param height The height of the new array texture, in pixels.
+/// @param scaling The scaling filter for the new array texture to use.
+/// This scaling filter is used for the entire array texture, individual elements cannot have their own scaling filters.
+/// @param num_pngs The total number of given PNGs.
+/// @param pngs All the PNGs to create the new textures within the new array texture from.
+void texture_init_png_array(struct texture_t *texture,
+                            unsigned int width,
+                            unsigned int height,
+                            enum texture_scaling_t scaling,
+                            unsigned int num_pngs,
+                            const struct png_t *pngs);
+
+/// Initialize the given texture with an empty 2D texture from the given parameters.
+///
+/// Note that the appearance of an empty texture varies depending on the format:
 ///  - `TEXTURE_RGBU8`: Solid black.
 ///  - `TEXTURE_RGBAU8`: Transparent.
-///
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// @param texture The texture to initialize.
-/// @param width The width of the new texture.
-/// @param height The height of the new texture.
+/// @param width The width of the new texture, in pixels.
+/// @param height The height of the new texture, in pixels.
 /// @param scaling The scaling filter for the new texture to use.
 /// @param format The format of the new texture's data.
 void texture_init_empty(struct texture_t *texture,

@@ -149,7 +149,7 @@ void ast_atlas_read(struct ast_t *ast, unsigned int index, struct texture_t *tex
     png_init_file(&png, ast->file);
 
     // initialize the given texture
-    texture_init_png(texture, &png, atlas->scaling);
+    texture_init_png(texture, atlas->scaling, &png);
 
     // deinitialize the png as its now loaded into the texture
     png_deinit(&png);
