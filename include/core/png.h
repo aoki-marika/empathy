@@ -55,7 +55,7 @@ void png_init_file(struct png_t *png, FILE *file);
 /// If the given texture is not a 2D texture then an assertion fails.
 /// @param png The PNG to initialize.
 /// @param texture The texture to use the contents of for the new PNG.
-void png_init_texture(struct png_t *png, struct texture_t *texture);
+void png_init_texture(struct png_t *png, const struct texture_t *texture);
 
 /// Deinitialize the given PNG, releasing all of its allocated resources.
 /// @param png The PNG to deinitialize.

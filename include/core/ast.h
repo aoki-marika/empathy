@@ -9,8 +9,7 @@
 ///
 /// The relationship between atlases and sprites is relatively weak; atlases are unaware of their sprites,
 /// and sprites only refer to their containing atlases by a unique identifier.
-/// This is to simplify the retrieval process where the caller does not have to be aware of which
-/// atlas a sprite belongs to to retrieve it.
+/// This is to simplify the retrieval process where the caller does not have to be aware of which atlas a sprite belongs to to retrieve it.
 ///
 
 // MARK: - Macros
@@ -28,6 +27,15 @@ struct ast_t
     /// The open handle to this set's file.
     FILE *file;
 
+    /// The width of this set's atlas array texture, in pixels.
+    unsigned int atlas_width;
+
+    /// The height of this set's atlas array texture, in pixels.
+    unsigned int atlas_height;
+
+    /// The filter used when scaling this set's atlas array texture up and down.
+    enum texture_scaling_t atlas_scaling;
+
     /// The total number of texture atlases within this set.
     unsigned int num_atlases;
 
@@ -41,9 +49,6 @@ struct ast_t
 
         /// The height of this atlas' texture, in pixels.
         unsigned int height;
-
-        /// The filter used when scaling this atlas' texture up and down.
-        enum texture_scaling_t scaling;
 
         /// The pointer to this atlas' PNG file within the containing atlas set's file.
         long png_pointer;
@@ -64,9 +69,15 @@ struct ast_t
         unsigned int atlas_index;
 
         /// The bottom left UV coordinates of this sprite's bounds.
+        ///
+        /// When this sprite is being written this is normalized to the containing atlas' texture's size.
+        /// When this sprite is being read this is normalized to the containing set's atlas arrray texture's size.
         struct uv_t bottom_left;
 
         /// The top right UV coordinates of this sprite's bounds.
+        ///
+        /// When this sprite is being written this is normalized to the containing atlas' texture's size.
+        /// When this sprite is being read this is normalized to the containing set's atlas arrray texture's size.
         struct uv_t top_right;
 
         /// The width of this sprite, in pixels.
@@ -95,28 +106,30 @@ void ast_init(struct ast_t *ast, const char *path);
 /// @param ast The set to deinitialize.
 void ast_deinit(struct ast_t *ast);
 
-/// Read the atlas at the given index within the given set into the given texture.
+/// Read the atlas array texture from the given atlas set into the given texture.
 ///
-/// The atlas is read from disk, so this should only be called during load time.
-/// If the given atlas index is out of bounds of the given set then an assertion fails.
+/// The given texture is initialized with a 2D array texture containing all the atlas textures from the given set.
+/// Sprites can use these textures by indexing into the array by their `atlas_index` property.
+/// The atlas textures are read from disk, so this should only be called during load time.
 /// During this function the given texture is initialized, so the caller is responsible for deinitializing it.
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
-/// @param ast The set to read the atlas from.
-/// @param index The index of the atlas to read within the given set.
-/// @param texture The texture to read the given atlas into.
-void ast_atlas_read(struct ast_t *ast, unsigned int index, struct texture_t *texture);
+/// @param ast The set to get the atlas array texture of.
+/// @param texture The texture to initialize with the new atlas array texture.
+void ast_get_texture(struct ast_t *ast, struct texture_t *texture);
 
 /// Write the given atlas set contents to an atlas set file at the current cursor of the given file handle.
 ///
 /// If the atlas index of any of the given sprites is out of bounds of the given atlases then an assertion fails.
 /// During this function the cursor of the given file handle is changed.
 /// @param file The file handle to write the given set contents to.
+/// @param atlas_scaling The filter to use when scaling the new set's atlas array texture up and down.
 /// @param num_atlases The total number of given atlases.
 /// @param atlases All the atlases to write to the set file.
 /// @param num_sprites The total number of given sprites.
 /// @param sprites All the sprites to write to the set file.
 void ast_write_contents(FILE *file,
+                        enum texture_scaling_t atlas_scaling,
                         unsigned int num_atlases,
-                        struct texture_t *atlases,
+                        const struct texture_t *atlases,
                         unsigned int num_sprites,
-                        struct ast_sprite_t *sprites);
+                        const struct ast_sprite_t *sprites);

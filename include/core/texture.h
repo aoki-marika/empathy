@@ -137,4 +137,4 @@ void texture_deinit(struct texture_t *texture);
 /// During this function the given unit is activated and bound to.
 /// @param texture The texture to bind.
 /// @param unit The unit to bind the given texture to.
-void texture_bind(struct texture_t *texture, unsigned int unit);
+void texture_bind(const struct texture_t *texture, unsigned int unit);

@@ -270,7 +270,7 @@ void texture_deinit(struct texture_t *texture)
     glDeleteTextures(1, &texture->id);
 }
 
-void texture_bind(struct texture_t *texture, unsigned int unit)
+void texture_bind(const struct texture_t *texture, unsigned int unit)
 {
     // ensure the given unit it valid
     assert(unit < TEXTURE_MAX_UNITS);
