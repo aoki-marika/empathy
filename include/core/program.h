@@ -13,7 +13,7 @@
 // MARK: - Macros
 
 /// The maximum number of uniform locations that a single program can cache concurrently.
-#define PROGRAM_MAX_CACHED_UNIFORMS 6
+#define PROGRAM_MAX_CACHED_UNIFORMS (6)
 
 // MARK: - Data Structures
 

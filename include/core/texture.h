@@ -24,13 +24,13 @@
 // MARK: - Macros
 
 /// The maximum number of texture units that textures can be uploaded to.
-#define TEXTURE_MAX_UNITS 16
+#define TEXTURE_MAX_UNITS (16)
 
 /// The special texture unit used to initialize textures within.
 ///
 /// OpenGL requires a unit to create a texture image, so this one is dedicated to that task.
 /// This unit can still be bound to by textures, though it is rarely recommended.
-#define TEXTURE_INIT_UNIT 0
+#define TEXTURE_INIT_UNIT (0)
 
 // MARK: - Data Structures
 

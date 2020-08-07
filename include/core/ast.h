@@ -18,7 +18,7 @@
 /// The maximum size of a fixed-size identifier string within an atlas set, in characters.
 ///
 /// This includes the trailing null terminator.
-#define AST_ID_MAX_SIZE 48
+#define AST_ID_MAX_SIZE (72)
 
 // MARK: - Data Structures
 
