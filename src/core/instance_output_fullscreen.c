@@ -10,7 +10,7 @@ void instance_output_fullscreen_output_init(struct instance_t *instance,
 {
     struct instance_output_fullscreen_t *output = (struct instance_output_fullscreen_t *)data;
 
-    /// create the shader program
+    // create the shader program
     {
         // minimal vertex shader with normalized xy and uv coordinates
         const char *vertex_source = \
