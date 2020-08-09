@@ -91,7 +91,7 @@ void layer_remove_child(struct layer_t *layer,
         exit(EXIT_FAILURE);
     }
 
-    // deinit the child layer before removing it
+    // deinitialize the child layer before removing it
     struct layer_t *child_layer = &layer->children[child_index];
     layer_deinit(child_layer);
 

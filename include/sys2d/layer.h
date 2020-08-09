@@ -2,6 +2,8 @@
 
 #include <core/vector.h>
 #include <core/colour.h>
+#include <core/texture.h>
+#include <core/uv.h>
 
 ///
 /// Layers are the basis of sys2d, defining scene graphs and their contents.
@@ -11,9 +13,8 @@
 ///
 /// The visual contents of a layer are defined by "attachments".
 /// Each attachment can be one of several types:
-///  - Text: The layer renders text using a font.
-///  - Texture: The layer samples UV coordinates of a texture.
 ///  - Colour: The layer is a flat colour.
+///  - Texture: The layer samples UV coordinates of a texture.
 /// These attachments can then be switched between with animations to create effects such as a sprite animation.
 ///
 
@@ -56,8 +57,14 @@ struct layer_t
         {
             /// The layer renders a solid colour.
             ///
-            /// Uses `colour`.
+            /// Uses `colour` to define the fill colour.
             LAYER_ATTACHMENT_COLOUR,
+
+            /// The layer renders a texture, sampling it using UV bounds.
+            ///
+            /// Uses `texture` to define the texture, and `bottom_left` and `top_right` to define the UV bounds.
+            /// Uses `texture_index`, if `texture`'s type is `TEXTURE_2D_ARRAY`, to define which texture within the array to use.
+            LAYER_ATTACHMENT_TEXTURE,
         } type;
 
         ///
@@ -67,6 +74,20 @@ struct layer_t
 
         /// The colour property of this attachment.
         struct colour4_t colour;
+
+        /// The texture property of this attachment.
+        ///
+        /// The lifetime of this texture is handled by the creator of this attachment.
+        struct texture_t *texture;
+
+        /// The texture index property of this attachment.
+        unsigned int texture_index;
+
+        /// The bottom-left normalized UV coordinate property of this attachment.
+        struct uv_t bottom_left;
+
+        /// The top-right normalized UV coordinate property of this attachment.
+        struct uv_t top_right;
     } *attachments;
 
     /// The unique identifier for the next child layer added to this layer.
