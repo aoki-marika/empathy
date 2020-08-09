@@ -137,3 +137,18 @@ struct layer_t *layer_get(struct layer_t *layer,
 /// @param properties The properties to set.
 void layer_set_properties(struct layer_t *layer,
                           struct layer_properties_t properties);
+
+/// Add the given attachment to the given layer.
+/// @param layer The layer to add the attachment to.
+/// @param attachment The attachment to add.
+/// It is expected that the properties of this attachment are available for the entire lifetime of the given layer.
+void layer_add_attachment(struct layer_t *layer,
+                          struct layer_attachment_t attachment);
+
+/// Remove the attachment at the given index from the given layer.
+///
+/// If the given index is out of bounds of the given layer's attachments then an assertion fails.
+/// @param layer The layer to remove the attachment from.
+/// @param index The index of the attachment to remove within the given layer's attachments.
+void layer_remove_attachment(struct layer_t *layer,
+                             unsigned int index);

@@ -120,3 +120,27 @@ void layer_set_properties(struct layer_t *layer,
 {
     layer->properties = properties;
 }
+
+void layer_add_attachment(struct layer_t *layer,
+                          struct layer_attachment_t attachment)
+{
+    // insert the new attachment
+    unsigned int index = layer->num_attachments++;
+    layer->attachments = realloc(layer->attachments,
+                                 layer->num_attachments * sizeof(struct layer_attachment_t));
+
+    layer->attachments[index] = attachment;
+}
+
+void layer_remove_attachment(struct layer_t *layer,
+                             unsigned int index)
+{
+    // shuffle and reallocate the layers attachments array and to remove the attachments element
+    memmove(&layer->attachments[index],
+            &layer->attachments[index + 1],
+            (layer->num_attachments - (index + 1)) * sizeof(struct layer_attachment_t));
+
+    layer->num_attachments--;
+    layer->attachments = realloc(layer->attachments,
+                                 layer->num_attachments * sizeof(struct layer_attachment_t));
+}
