@@ -109,19 +109,19 @@ void layer_deinit(struct layer_t *layer);
 /// @param attachments All the attachments to attach to the new child layer.
 /// The elements of this array are copied, so it does not need to remain accessible.
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new child layer.
-void layer_add(struct layer_t *layer,
-               layer_id_t *child_id,
-               struct layer_properties_t properties,
-               unsigned int num_attachments,
-               const struct layer_attachment_t *attachments);
+void layer_add_child(struct layer_t *layer,
+                     layer_id_t *child_id,
+                     struct layer_properties_t properties,
+                     unsigned int num_attachments,
+                     const struct layer_attachment_t *attachments);
 
 /// Remove the first child layer matching the given unique identifier within the given layer's children, deinitializing it.
 ///
 /// If no child matching the given unique identifier is found within the given layer's children then the program terminates.
 /// @param layer The layer containing the layer to remove.
 /// @param child_id The unique identifier of the child layer to remove.
-void layer_remove(struct layer_t *layer,
-                  layer_id_t child_id);
+void layer_remove_child(struct layer_t *layer,
+                        layer_id_t child_id);
 
 /// Get the first child layer matching the given unique identifier within the given layer's children, if any.
 /// @param layer The layer containing the layer to get.
@@ -129,8 +129,8 @@ void layer_remove(struct layer_t *layer,
 /// @return A pointer to the first child layer matching the given unique identifier within the given layer's children.
 /// This pointer is only available until the given layer's children are modified.
 /// If no matches were found then `NULL` is returned instead.
-struct layer_t *layer_get(struct layer_t *layer,
-                          layer_id_t child_id);
+struct layer_t *layer_get_child(struct layer_t *layer,
+                                layer_id_t child_id);
 
 /// Set the properties of the given layer to the given properties.
 /// @param layer The layer to set the properties of.

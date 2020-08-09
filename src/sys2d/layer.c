@@ -54,11 +54,11 @@ void layer_deinit(struct layer_t *layer)
     free(layer->attachments);
 }
 
-void layer_add(struct layer_t *layer,
-               layer_id_t *child_id,
-               struct layer_properties_t properties,
-               unsigned int num_attachments,
-               const struct layer_attachment_t *attachments)
+void layer_add_child(struct layer_t *layer,
+                     layer_id_t *child_id,
+                     struct layer_properties_t properties,
+                     unsigned int num_attachments,
+                     const struct layer_attachment_t *attachments)
 {
     // insert the new child layer
     unsigned int child_index = layer->num_children++;
@@ -79,8 +79,8 @@ void layer_add(struct layer_t *layer,
         *child_id = child_layer->id;
 }
 
-void layer_remove(struct layer_t *layer,
-                  layer_id_t child_id)
+void layer_remove_child(struct layer_t *layer,
+                        layer_id_t child_id)
 {
     // attempt to get the index of the child layer to remove
     int child_index = layer_get_child_index(layer, child_id);
@@ -105,8 +105,8 @@ void layer_remove(struct layer_t *layer,
                               layer->num_children * sizeof(struct layer_t));
 }
 
-struct layer_t *layer_get(struct layer_t *layer,
-                          layer_id_t child_id)
+struct layer_t *layer_get_child(struct layer_t *layer,
+                                layer_id_t child_id)
 {
     int child_index = layer_get_child_index(layer, child_id);
     if (child_index >= 0)
