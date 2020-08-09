@@ -26,10 +26,10 @@ int layer_get_child_index(layer_id_t child_id,
     return -1;
 }
 
-void layer_init_root(struct layer_t *layer,
-                     struct layer_properties_t properties,
-                     unsigned int num_attachments,
-                     const struct layer_attachment_t *attachments)
+void layer_init(struct layer_t *layer,
+                struct layer_properties_t properties,
+                unsigned int num_attachments,
+                const struct layer_attachment_t *attachments)
 {
     // initialize the given layer
     layer->id = 0;
@@ -45,11 +45,20 @@ void layer_init_root(struct layer_t *layer,
     memcpy(layer->attachments, attachments, attachments_size);
 }
 
-void layer_init_child(layer_id_t *child_id,
-                      struct layer_t *parent,
-                      struct layer_properties_t properties,
-                      unsigned int num_attachments,
-                      const struct layer_attachment_t *attachments)
+void layer_deinit(struct layer_t *layer)
+{
+    for (int i = 0; i < layer->num_children; i++)
+        layer_deinit(&layer->children[i]);
+
+    free(layer->children);
+    free(layer->attachments);
+}
+
+void layer_add(layer_id_t *child_id,
+               struct layer_t *parent,
+               struct layer_properties_t properties,
+               unsigned int num_attachments,
+               const struct layer_attachment_t *attachments)
 {
     // insert the new child layer
     unsigned int layer_index = parent->num_children;
@@ -60,40 +69,15 @@ void layer_init_child(layer_id_t *child_id,
     struct layer_t *layer = &parent->children[layer_index];
 
     // initialize the new child layer
-    layer_init_root(layer,
-                    properties,
-                    num_attachments,
-                    attachments);
+    layer_init(layer,
+               properties,
+               num_attachments,
+               attachments);
     layer->id = parent->next_child_id++;
 
     // set the given child id pointers value, if there is one
     if (child_id != NULL)
         *child_id = layer->id;
-}
-
-void layer_deinit(struct layer_t *layer)
-{
-    for (int i = 0; i < layer->num_children; i++)
-        layer_deinit(&layer->children[i]);
-
-    free(layer->children);
-    free(layer->attachments);
-}
-
-struct layer_t *layer_get_child(layer_id_t child_id,
-                                struct layer_t *parent)
-{
-    int index = layer_get_child_index(child_id, parent);
-    if (index >= 0)
-        return &parent->children[index];
-    else
-        return NULL;
-}
-
-void layer_set_properties(struct layer_t *layer,
-                          struct layer_properties_t properties)
-{
-    layer->properties = properties;
 }
 
 void layer_remove(layer_id_t child_id,
@@ -120,4 +104,20 @@ void layer_remove(layer_id_t child_id,
     parent->num_children--;
     parent->children = realloc(parent->children,
                                parent->num_children * sizeof(struct layer_t));
+}
+
+struct layer_t *layer_get(layer_id_t child_id,
+                                struct layer_t *parent)
+{
+    int index = layer_get_child_index(child_id, parent);
+    if (index >= 0)
+        return &parent->children[index];
+    else
+        return NULL;
+}
+
+void layer_set_properties(struct layer_t *layer,
+                          struct layer_properties_t properties)
+{
+    layer->properties = properties;
 }

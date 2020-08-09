@@ -90,10 +90,14 @@ struct layer_t
 /// @param attachments All the attachments to attach to the new layer.
 /// The elements of this array are copied, so it does not need to remain accessible.
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
-void layer_init_root(struct layer_t *layer,
-                     struct layer_properties_t properties,
-                     unsigned int num_attachments,
-                     const struct layer_attachment_t *attachments);
+void layer_init(struct layer_t *layer,
+                struct layer_properties_t properties,
+                unsigned int num_attachments,
+                const struct layer_attachment_t *attachments);
+
+/// Deinitialize the given layer and all its children, releasing all of their allocated resources.
+/// @param layer The layer to deinitialize.
+void layer_deinit(struct layer_t *layer);
 
 /// Add a new child layer to the given parent layer's children with the given properties and attachments.
 /// @param child_id The pointer to set the value of to the unique identifier of the new child layer, within the given parent's children.
@@ -105,30 +109,11 @@ void layer_init_root(struct layer_t *layer,
 /// @param attachments All the attachments to attach to the new child layer.
 /// The elements of this array are copied, so it does not need to remain accessible.
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new child layer.
-void layer_init_child(layer_id_t *child_id,
-                      struct layer_t *parent,
-                      struct layer_properties_t properties,
-                      unsigned int num_attachments,
-                      const struct layer_attachment_t *attachments);
-
-/// Deinitialize the given layer and all its children, releasing all of their allocated resources.
-/// @param layer The layer to deinitialize.
-void layer_deinit(struct layer_t *layer);
-
-/// Get the first child layer matching the given unique identifier within the given parent's children, if any.
-/// @param child_id The unique identifier of the child layer to get.
-/// @param parent The layer containing the layer to get.
-/// @return A pointer to the first child layer matching the given unique identifier within the given parent's children.
-/// This pointer is only accessible until the given parent's children are modified.
-/// If no matches were found then `NULL` is returned instead.
-struct layer_t *layer_get_child(layer_id_t child_id,
-                                struct layer_t *parent);
-
-/// Set the properties of the given layer to the given properties.
-/// @param layer The layer to set the properties of.
-/// @param properties The properties to set.
-void layer_set_properties(struct layer_t *layer,
-                          struct layer_properties_t properties);
+void layer_add(layer_id_t *child_id,
+               struct layer_t *parent,
+               struct layer_properties_t properties,
+               unsigned int num_attachments,
+               const struct layer_attachment_t *attachments);
 
 /// Remove the first child layer matching the given unique identifier within the given parent's children, deinitializing it.
 ///
@@ -137,3 +122,18 @@ void layer_set_properties(struct layer_t *layer,
 /// @param parent The layer containing the layer to remove.
 void layer_remove(layer_id_t child_id,
                   struct layer_t *parent);
+
+/// Get the first child layer matching the given unique identifier within the given parent's children, if any.
+/// @param child_id The unique identifier of the child layer to get.
+/// @param parent The layer containing the layer to get.
+/// @return A pointer to the first child layer matching the given unique identifier within the given parent's children.
+/// This pointer is only accessible until the given parent's children are modified.
+/// If no matches were found then `NULL` is returned instead.
+struct layer_t *layer_get(layer_id_t child_id,
+                          struct layer_t *parent);
+
+/// Set the properties of the given layer to the given properties.
+/// @param layer The layer to set the properties of.
+/// @param properties The properties to set.
+void layer_set_properties(struct layer_t *layer,
+                          struct layer_properties_t properties);
