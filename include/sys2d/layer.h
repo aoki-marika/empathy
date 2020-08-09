@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/vector.h>
+#include <core/colour.h>
 
 ///
 /// Layers are the basis of sys2d, defining scene graphs and their contents.
@@ -10,8 +11,8 @@
 ///
 /// The visual contents of a layer are defined by "attachments".
 /// Each attachment can be one of several types:
-///  - Texture: The layer samples UV coordinates of a texture.
 ///  - Text: The layer renders text using a font.
+///  - Texture: The layer samples UV coordinates of a texture.
 ///  - Colour: The layer is a flat colour.
 /// These attachments can then be switched between with animations to create effects such as a sprite animation.
 ///
@@ -42,6 +43,32 @@ struct layer_t
         struct vector2_t size;
     } properties;
 
+    /// The total number of attachments attached to this layer.
+    unsigned int num_attachments;
+
+    /// All the attachments attached to this layer.
+    ///
+    /// Allocated.
+    struct layer_attachment_t
+    {
+        /// The type of this attachment.
+        enum layer_attachment_type_t
+        {
+            /// The layer renders a solid colour.
+            ///
+            /// Uses `colour`.
+            LAYER_ATTACHMENT_COLOUR,
+        } type;
+
+        ///
+        /// Different properties are used depending on the attachment type.
+        /// See `layer_attach_type_t` case documentation to determine which are used by each type.
+        ///
+
+        /// The colour property of this attachment.
+        struct colour4_t colour;
+    } *attachments;
+
     /// The unique identifier for the next child layer added to this layer.
     layer_id_t next_child_id;
 
@@ -56,19 +83,33 @@ struct layer_t
 
 // MARK: - Functions
 
-/// Initialize the given layer as a root layer with the given properties.
+/// Initialize the given layer as a root layer with the given properties and attachments.
 /// @param layer The layer to initialize.
 /// @param properties The properties of the new layer.
+/// @param num_attachments The total number of given attachments.
+/// @param attachments All the attachments to attach to the new layer.
+/// The elements of this array are copied, so it does not need to remain accessible.
+/// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
 void layer_init_root(struct layer_t *layer,
-                     struct layer_properties_t properties);
+                     struct layer_properties_t properties,
+                     unsigned int num_attachments,
+                     const struct layer_attachment_t *attachments);
 
-/// Insert a new child layer into the given layer with the given properties.
+/// Add a new child layer to the given parent layer's children with the given properties and attachments.
 /// @param child_id The pointer to set the value of to the unique identifier of the new child layer, within the given parent's children.
 /// If this is `NULL` then it is not set.
+/// @param parent The layer to add the new child layer to the children of.
+/// It is expected that this layer is available for the entire lifetime of the new child layer.
 /// @param properties The properties of the new child layer.
+/// @param num_attachments The total number of given attachments.
+/// @param attachments All the attachments to attach to the new child layer.
+/// The elements of this array are copied, so it does not need to remain accessible.
+/// It is expected that the properties of each attachment are available for the entire lifetime of the new child layer.
 void layer_init_child(layer_id_t *child_id,
                       struct layer_t *parent,
-                      struct layer_properties_t properties);
+                      struct layer_properties_t properties,
+                      unsigned int num_attachments,
+                      const struct layer_attachment_t *attachments);
 
 /// Deinitialize the given layer and all its children, releasing all of their allocated resources.
 /// @param layer The layer to deinitialize.
