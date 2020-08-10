@@ -80,7 +80,7 @@ void instance_output_imgui_tool_program_render(struct instance_output_imgui_t *o
     const struct framebuffer_t *framebuffer = &instance->program.framebuffer;
     unsigned int width = framebuffer->texture.width;
     unsigned int height = framebuffer->texture.height;
-    igBegin("Program", &tool->is_open, ImGuiWindowFlags_NoResize);
+    igBegin("Program", &tool->is_open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_HorizontalScrollbar);
         igImage((void *)(intptr_t)framebuffer->texture.id,
                 (ImVec2) { width, height },
                 (ImVec2) { 0, 1 },
