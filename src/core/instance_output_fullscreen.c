@@ -81,8 +81,8 @@ void instance_output_fullscreen_output_init(struct instance_t *instance,
         // two triangles to form a quad
         const unsigned int indices[] =
         {
-            0, 1, 2, // top-left half
-            1, 2, 3, // bottom-right half
+            0, 1, 2, //top-left triangle
+            1, 2, 3, //bottom-right triangle
         };
 
         mesh_init(&output->mesh,

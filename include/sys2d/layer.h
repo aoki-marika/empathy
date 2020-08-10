@@ -4,6 +4,7 @@
 #include <core/colour.h>
 #include <core/texture.h>
 #include <core/uv.h>
+#include <core/mesh.h>
 
 ///
 /// Layers are the basis of sys2d, defining scene graphs and their contents.
@@ -22,6 +23,28 @@
 
 /// A unique identifier for a layer, within its parent's children.
 typedef unsigned int layer_id_t;
+
+// MARK: - Macros
+
+/// The index of the vertex attribute that layer attachments bind their XYZ positions to.
+///
+/// XYZ coordinates are in pixels, with a top-left origin.
+#define LAYER_ATTACHMENT_XYZ_ATTRIBUTE_INDEX           (0)
+
+/// The index of the vertex attribute that layer attachments bind their RGBA colours to.
+///
+/// RGBA components are normalized from `0` to `1`.
+#define LAYER_ATTACHMENT_RGBA_ATTRIBUTE_INDEX          (1)
+
+/// The index of the vertex attribute that layer attachments bind their texture UV coordinates to.
+///
+/// UV components are normalized from `0` to `1`, with a bottom-left origin.
+#define LAYER_ATTACHMENT_UV_ATTRIBUTE_INDEX            (2)
+
+/// The index of the vertex attribute that layer attachments bind their texture array index to.
+///
+/// Texture indices are in elements.
+#define LAYER_ATTACHMENT_TEXTURE_INDEX_ATTRIBUTE_INDEX (3)
 
 // MARK: - Data Structures
 
@@ -97,6 +120,22 @@ struct layer_t
 
         /// The top-right UV coordinates of the bounds that this attachment samples its texture from.
         struct uv_t texture_top_right;
+
+        ///
+        /// Render state properties.
+        ///
+
+        /// The current render state of this attachment.
+        ///
+        /// This state is created with fixed properties of the layer when it is added, so it must be reinitialized when the layer's properties change.
+        struct layer_attachment_render_state_t
+        {
+            /// The mesh used to render this attachment.
+            ///
+            /// Only size and origin are accounted for in this mesh;
+            /// anchor, position, and other animatable or parent-relative properties must be applied when rendering.
+            struct mesh_t mesh;
+        } render_state;
     } *attachments;
 
     /// The unique identifier for the next child layer added to this layer.
