@@ -60,6 +60,8 @@ struct mesh_component_t
 
 /// Initialize the given mesh with the given vertices and vertex indices, described by the given components.
 /// @param mesh The mesh to initialize.
+/// @param num_components The total number of components within each vertex of the given vertices.
+/// @param components All the components within each vertex of the given vertices.
 /// @param vertices_size The total size, in bytes, of the given vertices.
 /// @param vertices All the vertices of the new mesh.
 /// These vertices are not drawn directly, but rather by the given indices into these vertices.
@@ -67,15 +69,13 @@ struct mesh_component_t
 /// @param indices All the vertex indices of the new mesh.
 /// Each index points to a vertex within the given vertices.
 /// It is assumed when drawing that these indices form triangles.
-/// @param num_components The total number of components within each vertex of the given vertices.
-/// @param components All the components within each vertex of the given vertices.
 void mesh_init(struct mesh_t *mesh,
+               unsigned int num_components,
+               const struct mesh_component_t *components,
                size_t vertices_size,
                const void *vertices,
                size_t indices_size,
-               const unsigned int *indices,
-               unsigned int num_components,
-               const struct mesh_component_t *components);
+               const unsigned int *indices);
 
 /// Deinitialize the given mesh, releasing all of its allocated resources.
 /// @param mesh The mesh to deinitialize.

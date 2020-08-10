@@ -86,12 +86,12 @@ void instance_output_fullscreen_output_init(struct instance_t *instance,
         };
 
         mesh_init(&output->mesh,
+                  sizeof(components) / sizeof(struct mesh_component_t),
+                  components,
                   sizeof(vertices),
                   vertices,
                   sizeof(indices),
-                  indices,
-                  sizeof(components) / sizeof(struct mesh_component_t),
-                  components);
+                  indices);
     }
 }
 

@@ -3,12 +3,12 @@
 // MARK: - Functions
 
 void mesh_init(struct mesh_t *mesh,
+               unsigned int num_components,
+               const struct mesh_component_t *components,
                size_t vertices_size,
                const void *vertices,
                size_t indices_size,
-               const unsigned int *indices,
-               unsigned int num_components,
-               const struct mesh_component_t *components)
+               const unsigned int *indices)
 {
     // create the vertex array
     GLuint vertex_array_id;
