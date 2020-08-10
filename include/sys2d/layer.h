@@ -146,6 +146,7 @@ struct layer_t
 
     /// All the child layers within this layer.
     ///
+    /// Children are ordererd back-to-front, on top of the parent.
     /// Allocated.
     struct layer_t *children;
 };
