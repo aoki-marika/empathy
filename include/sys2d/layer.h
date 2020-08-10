@@ -55,39 +55,48 @@ struct layer_t
         /// The type of this attachment.
         enum layer_attachment_type_t
         {
-            /// The layer renders a solid colour.
-            ///
-            /// Uses `colour` to define the fill colour.
+            /// The layer renders colours in each corner which it interpolates between.
             LAYER_ATTACHMENT_COLOUR,
 
             /// The layer renders a texture, sampling it using UV bounds.
-            ///
-            /// Uses `texture` to define the texture, and `bottom_left` and `top_right` to define the UV bounds.
-            /// Uses `texture_index`, if `texture`'s type is `TEXTURE_2D_ARRAY`, to define which texture within the array to use.
             LAYER_ATTACHMENT_TEXTURE,
         } type;
 
         ///
-        /// Different properties are used depending on the attachment type.
-        /// See `layer_attach_type_t` case documentation to determine which are used by each type.
+        /// `LAYER_ATTACHMENT_COLOUR` properties.
         ///
 
-        /// The colour property of this attachment.
-        struct colour4_t colour;
+        /// The colour of the top-left corner of this attachment.
+        struct colour4_t colour_top_left;
 
-        /// The texture property of this attachment.
+        /// The colour of the top-right corner of this attachment.
+        struct colour4_t colour_top_right;
+
+        /// The colour of the bottom-left corner of this attachment.
+        struct colour4_t colour_bottom_left;
+
+        /// The colour of the bottom-right corner of this attachment.
+        struct colour4_t colour_bottom_right;
+
+        ///
+        /// `LAYER_ATTACHMENT_TEXTURE` properties.
+        ///
+
+        /// The texture of which this attachment samples.
         ///
         /// The lifetime of this texture is handled by the creator of this attachment.
         struct texture_t *texture;
 
-        /// The texture index property of this attachment.
+        /// The index, within this attachment's array texture, of the texture that this attachment samples.
+        ///
+        /// This is only used if `texture` is of type `TEXTURE_2D_ARRAY`.
         unsigned int texture_index;
 
-        /// The bottom-left normalized UV coordinate property of this attachment.
-        struct uv_t bottom_left;
+        /// The bottom-left UV coordinates of the bounds that this attachment samples its texture from.
+        struct uv_t texture_bottom_left;
 
-        /// The top-right normalized UV coordinate property of this attachment.
-        struct uv_t top_right;
+        /// The top-right UV coordinates of the bounds that this attachment samples its texture from.
+        struct uv_t texture_top_right;
     } *attachments;
 
     /// The unique identifier for the next child layer added to this layer.
