@@ -88,4 +88,4 @@ void program_set_sampler2DArray(struct program_t *program,
 
 void program_set_mat4(struct program_t *program,
                       const char *name,
-                      const struct matrix4_t *value);
+                      struct matrix4_t value);

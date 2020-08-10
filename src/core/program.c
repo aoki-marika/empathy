@@ -119,9 +119,9 @@ void program_set_sampler2DArray(struct program_t *program,
 
 void program_set_mat4(struct program_t *program,
                       const char *name,
-                      const struct matrix4_t *matrix)
+                      struct matrix4_t matrix)
 {
     GLint location = program_locate_uniform(program, name);
     program_use(program);
-    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix->elements[0][0]);
+    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix.elements[0][0]);
 }
