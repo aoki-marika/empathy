@@ -11,18 +11,23 @@
 /// Set the given layer's, and optionally its children's, dirt to the given dirt.
 /// @param layer The layer to set the dirt of.
 /// @param dirt The dirt to set.
+/// @param add Whether or not the given dirt should be added to the existing dirt, instead of overwriting it.
 /// @param recursive Whether or not the given layer's children should have their dirt recursively set to the given dirt.
 void layer_set_dirt(struct layer_t *layer,
                     enum layer_dirt_t dirt,
+                    bool add,
                     bool recursive)
 {
     // set the given layers dirt
-    layer->dirt = dirt;
+    if (add)
+        layer->dirt |= dirt;
+    else
+        layer->dirt = dirt;
 
     // set the given layers childrens dirt
     if (recursive)
         for (int i = 0; i < layer->num_children; i++)
-            layer_set_dirt(&layer->children[i], dirt, true);
+            layer_set_dirt(&layer->children[i], dirt, add, true);
 }
 
 /// Render the given colour attachment using the current state of the given layer, initializing the given mesh with said rendered state.
@@ -228,7 +233,7 @@ void layer_render(struct layer_t *layer)
     }
 
     // reset the given layers dirt to reflect that the changes have been rendered
-    layer_set_dirt(layer, 0x0, false);
+    layer_set_dirt(layer, 0x0, false, false);
 }
 
 /// Get the index of the first child layer matching the given unique identifier within the given layer's children.
@@ -286,7 +291,7 @@ void layer_init_dirty(struct layer_t *layer,
     memcpy(layer->attachments, attachments, attachments_size);
 
     // set the dirt
-    layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true);
+    layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true, true);
 }
 
 void layer_init(struct layer_t *layer,
@@ -413,7 +418,7 @@ void layer_add_attachment(struct layer_t *layer,
     new_attachment->rendered_state.mesh = NULL;
 
     // perform the first render pass for the new attachment
-    layer_set_dirt(layer, LAYER_ATTACHMENTS, false);
+    layer_set_dirt(layer, LAYER_ATTACHMENTS, true, false);
     layer_render(layer);
 }
 
