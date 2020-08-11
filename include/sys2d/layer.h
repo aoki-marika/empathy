@@ -5,18 +5,24 @@
 #include <core/texture.h>
 #include <core/uv.h>
 #include <core/mesh.h>
+#include <core/matrix.h>
 
 ///
-/// Layers are the basis of sys2d, defining scene graphs and their contents.
+/// Layers are the core of Sys2D; defining scene graphs, their contents, rendering state, and providing drawing information.
 ///
 /// A layer can have children, of which use their parent's properties as a base for their own when rendering.
-/// For example, if a child has position `0,0` within a parent with position `50,50`, then the final render position is `50,50`.
+/// For example, if a child has position `0,0` within a parent with position `50,50`, then the rendered position is `50,50`.
 ///
 /// The visual contents of a layer are defined by "attachments".
 /// Each attachment can be one of several types:
 ///  - Colour: The layer is a flat colour.
 ///  - Texture: The layer samples UV coordinates of a texture.
 /// These attachments can then be switched between with animations to create effects such as a sprite animation.
+///
+/// For optimization, layers have their state rendered as little as possible.
+/// To do this layers have "dirt"; an indication of properties that have changed since the last time the layer was rendered.
+/// This then determines which parts of the layer need to be re-rendered when performing a render pass.
+/// Render passes are performed automatically by various mutating layer functions, when appropriate.
 ///
 
 // MARK: - Type Definitions
@@ -66,6 +72,29 @@ struct layer_t
         /// The size of this layer, in pixels.
         struct vector2_t size;
     } properties;
+
+    /// All the properties of this layer affected by changes which have occurred within this layer since the last render pass.
+    enum layer_dirt_t
+    {
+        /// Attachment's rendered states.
+        LAYER_ATTACHMENTS = 1 << 0,
+
+        /// Transform model matrices.
+        LAYER_TRANSFORM   = 1 << 1,
+    } dirt;
+
+    /// The last rendered state of this layer.
+    struct layer_rendered_state_t
+    {
+        /// The size of the layer's parent, in pixels.
+        struct vector2_t parent_size;
+
+        /// The world-space transform model matrix of the layer's parent.
+        struct matrix4_t parent_transform_world;
+
+        /// The world-space transform model matrix of the layer.
+        struct matrix4_t transform_world;
+    } rendered_state;
 
     /// The total number of attachments attached to this layer.
     unsigned int num_attachments;
@@ -125,17 +154,16 @@ struct layer_t
         /// Render state properties.
         ///
 
-        /// The current render state of this attachment.
-        ///
-        /// This state is created with fixed properties of the layer when it is added, so it must be reinitialized when the layer's properties change.
-        struct layer_attachment_render_state_t
+        /// The last rendered state of this attachment.
+        struct layer_attachment_rendered_state_t
         {
-            /// The mesh used to render this attachment.
+            /// The mesh used to draw the attachment, if any.
             ///
-            /// Only size and origin are accounted for in this mesh;
-            /// anchor, position, and other animatable or parent-relative properties must be applied when rendering.
-            struct mesh_t mesh;
-        } render_state;
+            /// Only size is accounted for in this mesh;
+            /// anchor, origin, position, and other animatable or parent-relative properties must be applied when drawing.
+            /// Allocated.
+            struct mesh_t *mesh;
+        } rendered_state;
     } *attachments;
 
     /// The unique identifier for the next child layer added to this layer.
@@ -201,12 +229,6 @@ void layer_remove_child(struct layer_t *layer,
 /// If no matches were found then `NULL` is returned instead.
 struct layer_t *layer_get_child(struct layer_t *layer,
                                 layer_id_t child_id);
-
-/// Set the properties of the given layer to the given properties.
-/// @param layer The layer to set the properties of.
-/// @param properties The properties to set.
-void layer_set_properties(struct layer_t *layer,
-                          struct layer_properties_t properties);
 
 /// Add the given attachment to the given layer.
 /// @param layer The layer to add the attachment to.
