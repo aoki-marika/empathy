@@ -404,6 +404,30 @@ struct layer_t *layer_get_child(struct layer_t *layer,
         return NULL;
 }
 
+void layer_set_anchor(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.anchor = value;
+    layer_set_dirt(layer, LAYER_TRANSFORM, true, true);
+    layer_render(layer);
+}
+
+void layer_set_origin(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.origin = value;
+    layer_set_dirt(layer, LAYER_TRANSFORM, true, true);
+    layer_render(layer);
+}
+
+void layer_set_size(struct layer_t *layer,
+                    struct vector2_t value)
+{
+    layer->properties.size = value;
+    layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true, true);
+    layer_render(layer);
+}
+
 void layer_add_attachment(struct layer_t *layer,
                           struct layer_attachment_t attachment)
 {

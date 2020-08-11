@@ -234,6 +234,24 @@ void layer_remove_child(struct layer_t *layer,
 struct layer_t *layer_get_child(struct layer_t *layer,
                                 layer_id_t child_id);
 
+/// Set the anchor of the given layer to the given value.
+/// @param layer The layer to set the anchor of.
+/// @param value The anchor to set.
+void layer_set_anchor(struct layer_t *layer,
+                      struct vector2_t value);
+
+/// Set the origin of the given layer to the given value.
+/// @param layer The layer to set the origin of.
+/// @param value The origin to set.
+void layer_set_origin(struct layer_t *layer,
+                      struct vector2_t value);
+
+/// Set the size of the given layer to the given value.
+/// @param layer The layer to set the size of.
+/// @param value The size to set.
+void layer_set_size(struct layer_t *layer,
+                    struct vector2_t value);
+
 /// Add the given attachment to the given layer.
 /// @param layer The layer to add the attachment to.
 /// @param attachment The attachment to add.
