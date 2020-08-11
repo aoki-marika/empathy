@@ -181,15 +181,15 @@ struct layer_t
 
 // MARK: - Functions
 
-/// Initialize the given layer as a root layer with the given properties and attachments.
+/// Initialize the given layer as a root layer with the given parameters.
 /// @param layer The layer to initialize.
-/// @param properties The properties of the new layer.
+/// @param size The size of the new layer, in pixels.
 /// @param num_attachments The total number of given attachments.
 /// @param attachments All the attachments to attach to the new layer.
 /// The elements of this array are copied, so it does not need to remain accessible.
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
 void layer_init(struct layer_t *layer,
-                struct layer_properties_t properties,
+                struct vector2_t size,
                 unsigned int num_attachments,
                 const struct layer_attachment_t *attachments);
 
@@ -197,19 +197,23 @@ void layer_init(struct layer_t *layer,
 /// @param layer The layer to deinitialize.
 void layer_deinit(struct layer_t *layer);
 
-/// Add a new child layer to the given layer's children with the given properties and attachments.
+/// Add a new child layer to the given layer's children with the given parameters.
 /// @param layer The layer to add the new child layer to the children of.
 /// It is expected that this layer is available for the entire lifetime of the new child layer.
 /// @param child_id The pointer to set the value of to the unique identifier of the new child layer, within the given layer's children.
 /// If this is `NULL` then it is not set.
-/// @param properties The properties of the new child layer.
+/// @param anchor The normalized point, within the new child layer's parent, that it anchors its centre to.
+/// @param origin The normalized point, within the new child layer, that it centres itself on.
+/// @param size The size of the new child layer, in pixels.
 /// @param num_attachments The total number of given attachments.
 /// @param attachments All the attachments to attach to the new child layer.
 /// The elements of this array are copied, so it does not need to remain accessible.
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new child layer.
 void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
-                     struct layer_properties_t properties,
+                     struct vector2_t anchor,
+                     struct vector2_t origin,
+                     struct vector2_t size,
                      unsigned int num_attachments,
                      const struct layer_attachment_t *attachments);
 

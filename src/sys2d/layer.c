@@ -254,6 +254,9 @@ int layer_get_child_index(struct layer_t *layer,
 /// Initialize the given layer as a root layer with the given properties and attachments, without performing a render pass on it.
 /// @param layer The layer to initialize.
 /// @param id The unique identifier of the new layer, within its parent's children.
+/// @param anchor The normalized point, within the new layer's parent, that it anchors its centre to.
+/// @param origin The normalized point, within the new layer, that it centres itself on.
+/// @param size The size of the new layer, in pixels.
 /// @param properties The properties of the new layer.
 /// @param num_attachments The total number of given attachments.
 /// @param attachments All the attachments to attach to the new layer.
@@ -261,13 +264,17 @@ int layer_get_child_index(struct layer_t *layer,
 /// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
 void layer_init_dirty(struct layer_t *layer,
                       layer_id_t id,
-                      struct layer_properties_t properties,
+                      struct vector2_t anchor,
+                      struct vector2_t origin,
+                      struct vector2_t size,
                       unsigned int num_attachments,
                       const struct layer_attachment_t *attachments)
 {
     // initialize the given layer
     layer->id = id;
-    layer->properties = properties;
+    layer->properties.anchor = anchor;
+    layer->properties.origin = origin;
+    layer->properties.size = size;
     layer->next_child_id = 0;
     layer->num_children = 0;
     layer->children = malloc(0);
@@ -283,14 +290,16 @@ void layer_init_dirty(struct layer_t *layer,
 }
 
 void layer_init(struct layer_t *layer,
-                struct layer_properties_t properties,
+                struct vector2_t size,
                 unsigned int num_attachments,
                 const struct layer_attachment_t *attachments)
 {
     // initialize the given layer
     layer_init_dirty(layer,
                      0,
-                     properties,
+                     vector2_zero(),
+                     vector2_zero(),
+                     size,
                      num_attachments,
                      attachments);
 
@@ -323,7 +332,9 @@ void layer_deinit(struct layer_t *layer)
 
 void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
-                     struct layer_properties_t properties,
+                     struct vector2_t anchor,
+                     struct vector2_t origin,
+                     struct vector2_t size,
                      unsigned int num_attachments,
                      const struct layer_attachment_t *attachments)
 {
@@ -337,7 +348,9 @@ void layer_add_child(struct layer_t *layer,
     // initialize the new child layer
     layer_init_dirty(child_layer,
                      layer->next_child_id++,
-                     properties,
+                     anchor,
+                     origin,
+                     size,
                      num_attachments,
                      attachments);
 
