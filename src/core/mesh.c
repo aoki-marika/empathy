@@ -90,7 +90,7 @@ void mesh_deinit(struct mesh_t *mesh)
     glDeleteVertexArrays(1, &mesh->vertex_array_id);
 }
 
-void mesh_draw(struct mesh_t *mesh)
+void mesh_draw(const struct mesh_t *mesh)
 {
     // bind and draw all the vertices within the given mesh
     glBindVertexArray(mesh->vertex_array_id);

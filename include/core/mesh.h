@@ -85,4 +85,4 @@ void mesh_deinit(struct mesh_t *mesh);
 ///
 /// During this function the given mesh's vertex array is bound.
 /// @param mesh The mesh to draw.
-void mesh_draw(struct mesh_t *mesh);
+void mesh_draw(const struct mesh_t *mesh);
