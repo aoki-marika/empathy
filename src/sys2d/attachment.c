@@ -145,6 +145,10 @@ void attachment_init_colour(struct attachment_t *attachment,
     attachment->colour.top_right = top_right;
     attachment->colour.bottom_left = bottom_left;
     attachment->colour.bottom_right = bottom_right;
+    attachment->texture.source = NULL;
+    attachment->texture.source_index = 0;
+    attachment->texture.bottom_left = uv(0, 0);
+    attachment->texture.top_right = uv(1, 1);
     attachment->rendered_state.mesh = NULL;
 }
 
@@ -159,6 +163,10 @@ void attachment_init_texture(struct attachment_t *attachment,
     attachment->id = id;
     attachment->type = ATTACHMENT_TEXTURE;
     attachment->dirt = ATTACHMENT_MESH;
+    attachment->colour.top_left = colour4(1, 1, 1, 1);
+    attachment->colour.top_right = colour4(1, 1, 1, 1);
+    attachment->colour.bottom_left = colour4(1, 1, 1, 1);
+    attachment->colour.bottom_right = colour4(1, 1, 1, 1);
     attachment->texture.source = source;
     attachment->texture.source_index = source_index;
     attachment->texture.bottom_left = bottom_left;
