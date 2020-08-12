@@ -145,7 +145,7 @@ void layer_render(struct layer_t *layer)
     }
 
     // reset the given layers dirt, as it has now been applied
-    layer->dirt = 0x0;
+    layer->dirt = LAYER_NONE;
 }
 
 // MARK: Children

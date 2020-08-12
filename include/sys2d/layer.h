@@ -45,6 +45,9 @@ struct layer_t
     /// All the properties of this layer affected by changes which have occurred within this layer since the last render pass.
     enum layer_dirt_t
     {
+        /// None.
+        LAYER_NONE      = 0 << 0,
+
         /// Transform matrix.
         LAYER_TRANSFORM = 1 << 0,
     } dirt;

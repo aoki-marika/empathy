@@ -183,6 +183,7 @@ void attachment_render(struct attachment_t *attachment,
     enum attachment_dirt_t dirt = attachment->dirt;
     if (dirt & ATTACHMENT_MESH)
     {
+        // the mesh needs to be re-initialized
         // get the mesh to initialize
         // if the mesh is already allocated then it only needs to be reinitialized
         struct mesh_t **mesh = &attachment->rendered_state.mesh;
@@ -208,5 +209,5 @@ void attachment_render(struct attachment_t *attachment,
     }
 
     // reset the given attachments dirt, as it has now been applied
-    attachment->dirt = 0x0;
+    attachment->dirt = ATTACHMENT_NONE;
 }

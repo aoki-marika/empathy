@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/colour.h>
+#include <core/texture.h>
 #include <core/uv.h>
 #include <core/mesh.h>
 #include <core/vector.h>
@@ -64,6 +65,9 @@ struct attachment_t
     /// All the properties of this attachment affected by changes which have occurred within this attachment since the last render pass.
     enum attachment_dirt_t
     {
+        // None.
+        ATTACHMENT_NONE = 0 << 0,
+
         /// Mesh.
         ATTACHMENT_MESH = 1 << 0,
     } dirt;
