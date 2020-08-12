@@ -10,6 +10,7 @@ This project is split into several smaller components:
 
  - `core`: The internal engine library.
  - `sys2d`: The 2D subsystem.
+ - `cake`: The Sys2D Layer (S2L) editor.
  - `game`: The end user game.
 
 ### Building
@@ -25,6 +26,9 @@ Dependencies:
     - `libpng-dev` (`1.6.36-6`)
  - `sys2d`:
     - `core` (included)
+ - `cake`:
+    - `core` (included)
+    - `sys2d` (included)
  - `game`:
     - `core` (included)
     - `sys2d` (included)

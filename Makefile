@@ -102,6 +102,27 @@ $(SYS2D_OBJS): $(SYS2D_OBJ_DIR)/%.o : $(SYS2D_SRC_DIR)/%.c | $(SYS2D_OBJ_DIR)
 $(SYS2D_OBJ_DIR):
 	$(MKDIR) $@
 
+# cake
+CAKE_DIR := cake
+CAKE_INC_DIR := $(INC_DIR)/$(CAKE_DIR)
+CAKE_SRC_DIR := $(SRC_DIR)/$(CAKE_DIR)
+CAKE_OBJ_DIR := $(OBJ_DIR)/$(CAKE_DIR)
+CAKE_SRCS := $(wildcard $(CAKE_SRC_DIR)/*.c)
+CAKE_OBJS := $(CAKE_SRCS:$(CAKE_SRC_DIR)/%.c=$(CAKE_OBJ_DIR)/%.o)
+CAKE_DEPS := $(CAKE_OBJS:%.o=%.d)
+CAKE_CFLAGS := $(CFLAGS) -I$(CAKE_INC_DIR)
+CAKE_LDFLAGS := $(CORE_LDFLAGS)
+CAKE_OUT := $(BIN_DIR)/cake
+
+$(CAKE_OUT): $(CAKE_OBJS) $(CORE_OUT) $(SYS2D_OUT) | $(BIN_DIR)
+	$(LD) -Wl,-whole-archive $^ -Wl,-no-whole-archive -o $@ $(CAKE_LDFLAGS)
+
+$(CAKE_OBJS): $(CAKE_OBJ_DIR)/%.o : $(CAKE_SRC_DIR)/%.c | $(CAKE_OBJ_DIR)
+	$(CC) -MMD -c $< -o $@ $(CAKE_CFLAGS)
+
+$(CAKE_OBJ_DIR):
+	$(MKDIR) $@
+
 # game
 GAME_DIR := game
 GAME_INC_DIR := $(INC_DIR)/$(GAME_DIR)
@@ -128,9 +149,9 @@ cimgui: $(CIMGUI_OBJS)
 imgui_impl: $(IMGUI_IMPL_OBJS)
 core: $(CORE_OUT)
 sys2d: $(SYS2D_OUT)
+cake: $(CAKE_OUT)
 game: $(GAME_OUT)
-design: $(DESIGN_OUT)
-all: cimgui imgui_impl core game design
+all: cimgui imgui_impl core sys2d cake game
 .DEFAULT_GOAL := game
 
 $(BIN_DIR):
@@ -141,12 +162,12 @@ clean:
           $(IMGUI_IMPL_OBJS) \
           $(CORE_OUT) $(CORE_OBJS) $(CORE_DEPS) \
           $(SYS2D_OUT) $(SYS2D_OBJS) $(SYS2D_DEPS) \
-          $(GAME_OUT) $(GAME_OBJS) $(GAME_DEPS) \
-          $(DESIGN_OUT) $(DESIGN_OBJS) $(DESIGN_DEPS)
+          $(CAKE_OUT) $(CAKE_OBJS) $(CAKE_DEPS) \
+          $(GAME_OUT) $(GAME_OBJS) $(GAME_DEPS)
 
 # include the build generated dependency files
 # this allows make to detect changes to header files and recompile accordingly
 -include $(CORE_DEPS)
 -include $(SYS2D_DEPS)
+-include $(CAKE_DEPS)
 -include $(GAME_DEPS)
--include $(DESIGN_DEPS)
