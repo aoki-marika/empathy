@@ -271,9 +271,7 @@ void layer_init_dirty(struct layer_t *layer,
                       layer_id_t id,
                       struct vector2_t anchor,
                       struct vector2_t origin,
-                      struct vector2_t size,
-                      unsigned int num_attachments,
-                      const struct layer_attachment_t *attachments)
+                      struct vector2_t size)
 {
     // initialize the given layer
     layer->id = id;
@@ -281,32 +279,24 @@ void layer_init_dirty(struct layer_t *layer,
     layer->properties.origin = origin;
     layer->properties.size = size;
     layer->next_child_id = 0;
+    layer->num_attachments = 0;
+    layer->attachments = malloc(0);
     layer->num_children = 0;
     layer->children = malloc(0);
-
-    // copy the given attachments
-    size_t attachments_size = num_attachments * sizeof(struct layer_attachment_t);
-    layer->num_attachments = num_attachments;
-    layer->attachments = malloc(attachments_size);
-    memcpy(layer->attachments, attachments, attachments_size);
 
     // set the dirt
     layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true, true);
 }
 
 void layer_init(struct layer_t *layer,
-                struct vector2_t size,
-                unsigned int num_attachments,
-                const struct layer_attachment_t *attachments)
+                struct vector2_t size)
 {
     // initialize the given layer
     layer_init_dirty(layer,
                      0,
                      vector2_zero(),
                      vector2_zero(),
-                     size,
-                     num_attachments,
-                     attachments);
+                     size);
 
     // perform the first render pass
     // set defaults for rendered parent state as it will never be set otherwise
@@ -339,9 +329,7 @@ void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
                      struct vector2_t anchor,
                      struct vector2_t origin,
-                     struct vector2_t size,
-                     unsigned int num_attachments,
-                     const struct layer_attachment_t *attachments)
+                     struct vector2_t size)
 {
     // insert the new child layer
     unsigned int child_index = layer->num_children++;
@@ -355,9 +343,7 @@ void layer_add_child(struct layer_t *layer,
                      layer->next_child_id++,
                      anchor,
                      origin,
-                     size,
-                     num_attachments,
-                     attachments);
+                     size);
 
     // perform the first render pass
     // the parent is rendered to allow the parents rendered state to be set on the child

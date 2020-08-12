@@ -184,14 +184,8 @@ struct layer_t
 /// Initialize the given layer as a root layer with the given parameters.
 /// @param layer The layer to initialize.
 /// @param size The size of the new layer, in pixels.
-/// @param num_attachments The total number of given attachments.
-/// @param attachments All the attachments to attach to the new layer.
-/// The elements of this array are copied, so it does not need to remain accessible.
-/// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
 void layer_init(struct layer_t *layer,
-                struct vector2_t size,
-                unsigned int num_attachments,
-                const struct layer_attachment_t *attachments);
+                struct vector2_t size);
 
 /// Deinitialize the given layer and all its children, releasing all of their allocated resources.
 /// @param layer The layer to deinitialize.
@@ -205,17 +199,11 @@ void layer_deinit(struct layer_t *layer);
 /// @param anchor The normalized point, within the new child layer's parent, that it anchors its centre to.
 /// @param origin The normalized point, within the new child layer, that it centres itself on.
 /// @param size The size of the new child layer, in pixels.
-/// @param num_attachments The total number of given attachments.
-/// @param attachments All the attachments to attach to the new child layer.
-/// The elements of this array are copied, so it does not need to remain accessible.
-/// It is expected that the properties of each attachment are available for the entire lifetime of the new child layer.
 void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
                      struct vector2_t anchor,
                      struct vector2_t origin,
-                     struct vector2_t size,
-                     unsigned int num_attachments,
-                     const struct layer_attachment_t *attachments);
+                     struct vector2_t size);
 
 /// Remove the first child layer matching the given unique identifier within the given layer's children, deinitializing it.
 ///
