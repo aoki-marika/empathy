@@ -76,31 +76,6 @@ void layer_deinit(struct layer_t *layer)
     free(layer->attachments);
 }
 
-void layer_set_anchor(struct layer_t *layer,
-                      struct vector2_t value)
-{
-    layer->properties.anchor = value;
-    layer_add_dirt(layer, LAYER_TRANSFORM, true);
-}
-
-void layer_set_origin(struct layer_t *layer,
-                      struct vector2_t value)
-{
-    layer->properties.origin = value;
-    layer_add_dirt(layer, LAYER_TRANSFORM, true);
-}
-
-void layer_set_size(struct layer_t *layer,
-                    struct vector2_t value)
-{
-    layer->properties.size = value;
-    layer_add_dirt(layer, LAYER_TRANSFORM, true);
-
-    // attachments need to re-render their mesh for size changes
-    for (int i = 0; i < layer->num_attachments; i++)
-        layer->attachments[i].dirt |= ATTACHMENT_MESH;
-}
-
 void layer_render(struct layer_t *layer)
 {
     // render the given layer, depending on its dirt
@@ -146,6 +121,31 @@ void layer_render(struct layer_t *layer)
 
     // reset the given layers dirt, as it has now been applied
     layer->dirt = LAYER_NONE;
+}
+
+void layer_set_anchor(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.anchor = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
+void layer_set_origin(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.origin = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
+void layer_set_size(struct layer_t *layer,
+                    struct vector2_t value)
+{
+    layer->properties.size = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+
+    // attachments need to re-render their mesh for size changes
+    for (int i = 0; i < layer->num_attachments; i++)
+        layer->attachments[i].dirt |= ATTACHMENT_MESH;
 }
 
 // MARK: Children

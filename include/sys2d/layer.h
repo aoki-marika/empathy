@@ -103,6 +103,13 @@ void layer_init(struct layer_t *layer,
 /// @param layer The layer to deinitialize.
 void layer_deinit(struct layer_t *layer);
 
+/// Perform a render pass on the given layer and its children, re-rendering any properties that have changed since the last render pass.
+///
+/// This must be called before the given layer is drawn when it is initialized or when its properties change.
+/// Layers on their own will not perform a render pass, which will leave the rendered state empty.
+/// @param layer The layer to render.
+void layer_render(struct layer_t *layer);
+
 ///
 /// Layer property set functions.
 /// See `layer_properties_t` for documentation on the properties set by each.
@@ -116,13 +123,6 @@ void layer_set_origin(struct layer_t *layer,
 
 void layer_set_size(struct layer_t *layer,
                     struct vector2_t value);
-
-/// Perform a render pass on the given layer and its children, re-rendering any properties that have changed since the last render pass.
-///
-/// This must be called before the given layer is drawn when it is initialized or when its properties change.
-/// Layers on their own will not perform a render pass, which will leave the rendered state empty.
-/// @param layer The layer to render.
-void layer_render(struct layer_t *layer);
 
 // MARK: Children
 
