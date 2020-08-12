@@ -188,14 +188,18 @@ void layer_draw(const struct layer_t *layer,
     // draw the attachment, if there is one and it has a rendered mesh
     if (attachment != NULL && mesh != NULL)
     {
-        // get the shader program to use to draw the mesh
-        struct program_t *program;
+        // get the shader program to use to draw the mesh, if any
+        struct program_t *program = NULL;
         switch (attachment->type)
         {
             case ATTACHMENT_COLOUR:
                 program = &drawer->program_colour;
                 break;
             case ATTACHMENT_TEXTURE:
+                // the program cant be determined if there is no source
+                if (attachment->texture.source == NULL)
+                    break;
+
                 switch (attachment->texture.source->type)
                 {
                     case TEXTURE_2D:
@@ -208,9 +212,12 @@ void layer_draw(const struct layer_t *layer,
                 break;
         }
 
-        // configure the shader program
-        program_use(program);
-        program_set_mat4(program, "model", layer->rendered_state.transform_world);
+        // configure the shader program, if there is one
+        if (program != NULL)
+        {
+            program_use(program);
+            program_set_mat4(program, "model", layer->rendered_state.transform_world);
+        }
 
         // draw the mesh
         switch (attachment->type)
