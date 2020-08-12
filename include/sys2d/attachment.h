@@ -72,10 +72,10 @@ struct attachment_t
         ATTACHMENT_MESH = 1 << 0,
     } dirt;
 
-    /// The backing colour attachment of this attachment, if any.
+    /// The colour attachment properties of this attachment, if any.
     ///
     /// This is only used if `type` is `ATTACHMENT_COLOUR`.
-    struct attachment_colour_t
+    struct attachment_colour_properties_t
     {
         /// The colour of the top-left corner of this attachment.
         struct colour4_t top_left;
@@ -88,12 +88,12 @@ struct attachment_t
 
         /// The colour of the bottom-right corner of this attachment.
         struct colour4_t bottom_right;
-    } colour;
+    } colour_properties;
 
-    /// The backing texture attachment of this attachment, if any.
+    /// The texture attachment properties of this attachment, if any.
     ///
     /// This is only used if `type` is `ATTACHMENT_TEXTURE`.
-    struct attachment_texture_t
+    struct attachment_texture_properties_t
     {
         /// The texture of which this attachment samples.
         ///
@@ -110,7 +110,7 @@ struct attachment_t
 
         /// The top-right UV coordinates of the bounds that this attachment samples its texture from.
         struct uv_t top_right;
-    } texture;
+    } texture_properties;
 
     /// The last rendered state of this attachment.
     struct attachment_rendered_state_t
@@ -128,7 +128,7 @@ struct attachment_t
 /// Initialize the given attachment as a colour attachment with the given properties.
 /// @param attachment The attachment to initialize.
 /// @param id The unique identifier of the new attachment within its containing layer.
-/// See `attachment_colour_t` for property documentation.
+/// See `attachment_colour_properties_t` for property documentation.
 void attachment_init_colour(struct attachment_t *attachment,
                             attachment_id_t id,
                             struct colour4_t top_left,
@@ -139,7 +139,7 @@ void attachment_init_colour(struct attachment_t *attachment,
 /// Initialize the given attachment as a texture attachment with the given properties.
 /// @param attachment The attachment to initialize.
 /// @param id The unique identifier of the new attachment within its containing layer.
-/// See `attachment_texture_t` for property documentation.
+/// See `attachment_texture_properties_t` for property documentation.
 void attachment_init_texture(struct attachment_t *attachment,
                              attachment_id_t id,
                              struct texture_t *source,

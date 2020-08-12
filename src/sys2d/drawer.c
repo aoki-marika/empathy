@@ -197,10 +197,10 @@ void layer_draw(const struct layer_t *layer,
                 break;
             case ATTACHMENT_TEXTURE:
                 // the program cant be determined if there is no source
-                if (attachment->texture.source == NULL)
+                if (attachment->texture_properties.source == NULL)
                     break;
 
-                switch (attachment->texture.source->type)
+                switch (attachment->texture_properties.source->type)
                 {
                     case TEXTURE_2D:
                         program = &drawer->program_texture_2d;
@@ -224,10 +224,10 @@ void layer_draw(const struct layer_t *layer,
         {
             case ATTACHMENT_TEXTURE:
                 // if there is no texture source then dont draw the mesh
-                if (attachment->texture.source == NULL)
+                if (attachment->texture_properties.source == NULL)
                     break;
 
-                texture_bind(attachment->texture.source, DRAWER_UNIT);
+                texture_bind(attachment->texture_properties.source, DRAWER_UNIT);
             default:
                 mesh_draw(mesh);
                 break;

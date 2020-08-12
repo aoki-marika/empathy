@@ -4,11 +4,11 @@
 
 // MARK: - Functions
 
-/// Initialize the given mesh with the current state of the given colour attachment at the given size.
-/// @param attachment The colour attachment to render.
-/// @param size The size to render the given colour attachment at, in pixels.
+/// Initialize the given mesh with the given colour attachment properties at the given size.
+/// @param properties The colour attachment properties to use.
+/// @param size The size of the new mesh, in pixels.
 /// @param mesh The mesh to initialize.
-void attachment_colour_render_mesh(struct attachment_colour_t *attachment,
+void attachment_colour_render_mesh(struct attachment_colour_properties_t *properties,
                                    struct vector2_t size,
                                    struct mesh_t *mesh)
 {
@@ -34,10 +34,10 @@ void attachment_colour_render_mesh(struct attachment_colour_t *attachment,
     // use temporary shorthands to make the initializer shorter
     float w = size.x;
     float h = size.y;
-    struct colour4_t tl = attachment->top_left;
-    struct colour4_t tr = attachment->top_right;
-    struct colour4_t bl = attachment->bottom_left;
-    struct colour4_t br = attachment->bottom_right;
+    struct colour4_t tl = properties->top_left;
+    struct colour4_t tr = properties->top_right;
+    struct colour4_t bl = properties->bottom_left;
+    struct colour4_t br = properties->bottom_right;
     const float vertices[] =
     {
         0, 0, 0,    tl.r, tl.g, tl.b, tl.a, //top-left
@@ -64,11 +64,11 @@ void attachment_colour_render_mesh(struct attachment_colour_t *attachment,
               indices);
 }
 
-/// Initialize the given mesh with the current state of the given texture attachment at the given size.
-/// @param attachment The texture attachment to render.
-/// @param size The size to render the given texture attachment at, in pixels.
+/// Initialize the given mesh with the given texture attachment properties at the given size.
+/// @param properties The texture attachment properties to use.
+/// @param size The size of the new mesh, in pixels.
 /// @param mesh The mesh to initialize.
-void attachment_texture_render_mesh(struct attachment_texture_t *attachment,
+void attachment_texture_render_mesh(struct attachment_texture_properties_t *properties,
                                     struct vector2_t size,
                                     struct mesh_t *mesh)
 {
@@ -101,9 +101,9 @@ void attachment_texture_render_mesh(struct attachment_texture_t *attachment,
     // use temporary shorthands to make the initializer shorter
     float w = size.x;
     float h = size.y;
-    struct uv_t bl = attachment->bottom_left;
-    struct uv_t tr = attachment->top_right;
-    unsigned int si = attachment->source_index;
+    struct uv_t bl = properties->bottom_left;
+    struct uv_t tr = properties->top_right;
+    unsigned int si = properties->source_index;
     const float vertices[] =
     {
         0, 0, 0,    bl.u, tr.v,    si, //top-left
@@ -130,6 +130,33 @@ void attachment_texture_render_mesh(struct attachment_texture_t *attachment,
               indices);
 }
 
+/// Initialize the given attachment with the given unique identifier and default property values.
+/// @param attachment The attachment to initialize.
+/// @param id The unique identifier of the new attachment within the containing layer's children.
+void attachment_init(struct attachment_t *attachment,
+                     attachment_id_t id)
+{
+    // initialize the given attachment
+    // attachment
+    attachment->id = id;
+    attachment->dirt = ATTACHMENT_MESH;
+
+    // colour properties
+    attachment->colour_properties.top_left = colour4(1, 1, 1, 1);
+    attachment->colour_properties.top_right = colour4(1, 1, 1, 1);
+    attachment->colour_properties.bottom_left = colour4(1, 1, 1, 1);
+    attachment->colour_properties.bottom_right = colour4(1, 1, 1, 1);
+
+    // texture properties
+    attachment->texture_properties.source = NULL;
+    attachment->texture_properties.source_index = 0;
+    attachment->texture_properties.bottom_left = uv(0, 0);
+    attachment->texture_properties.top_right = uv(1, 1);
+
+    // rendered state
+    attachment->rendered_state.mesh = NULL;
+}
+
 void attachment_init_colour(struct attachment_t *attachment,
                             attachment_id_t id,
                             struct colour4_t top_left,
@@ -138,18 +165,12 @@ void attachment_init_colour(struct attachment_t *attachment,
                             struct colour4_t bottom_right)
 {
     // initialize the given attachment
-    attachment->id = id;
+    attachment_init(attachment, id);
     attachment->type = ATTACHMENT_COLOUR;
-    attachment->dirt = ATTACHMENT_MESH;
-    attachment->colour.top_left = top_left;
-    attachment->colour.top_right = top_right;
-    attachment->colour.bottom_left = bottom_left;
-    attachment->colour.bottom_right = bottom_right;
-    attachment->texture.source = NULL;
-    attachment->texture.source_index = 0;
-    attachment->texture.bottom_left = uv(0, 0);
-    attachment->texture.top_right = uv(1, 1);
-    attachment->rendered_state.mesh = NULL;
+    attachment->colour_properties.top_left = top_left;
+    attachment->colour_properties.top_right = top_right;
+    attachment->colour_properties.bottom_left = bottom_left;
+    attachment->colour_properties.bottom_right = bottom_right;
 }
 
 void attachment_init_texture(struct attachment_t *attachment,
@@ -160,18 +181,12 @@ void attachment_init_texture(struct attachment_t *attachment,
                              struct uv_t top_right)
 {
     // initialize the given attachment
-    attachment->id = id;
+    attachment_init(attachment, id);
     attachment->type = ATTACHMENT_TEXTURE;
-    attachment->dirt = ATTACHMENT_MESH;
-    attachment->colour.top_left = colour4(1, 1, 1, 1);
-    attachment->colour.top_right = colour4(1, 1, 1, 1);
-    attachment->colour.bottom_left = colour4(1, 1, 1, 1);
-    attachment->colour.bottom_right = colour4(1, 1, 1, 1);
-    attachment->texture.source = source;
-    attachment->texture.source_index = source_index;
-    attachment->texture.bottom_left = bottom_left;
-    attachment->texture.top_right = top_right;
-    attachment->rendered_state.mesh = NULL;
+    attachment->texture_properties.source = source;
+    attachment->texture_properties.source_index = source_index;
+    attachment->texture_properties.bottom_left = bottom_left;
+    attachment->texture_properties.top_right = top_right;
 }
 
 void attachment_deinit(struct attachment_t *attachment)
@@ -204,12 +219,12 @@ void attachment_render(struct attachment_t *attachment,
         switch (attachment->type)
         {
             case ATTACHMENT_COLOUR:
-                attachment_colour_render_mesh(&attachment->colour,
+                attachment_colour_render_mesh(&attachment->colour_properties,
                                               size,
                                               *mesh);
                 break;
             case ATTACHMENT_TEXTURE:
-                attachment_texture_render_mesh(&attachment->texture,
+                attachment_texture_render_mesh(&attachment->texture_properties,
                                                size,
                                                *mesh);
                 break;
