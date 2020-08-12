@@ -105,7 +105,6 @@ void program_set_sampler2D(struct program_t *program,
                            unsigned int unit)
 {
     GLint location = program_locate_uniform(program, name);
-    program_use(program);
     glUniform1i(location, unit);
 }
 
@@ -122,6 +121,5 @@ void program_set_mat4(struct program_t *program,
                       struct matrix4_t matrix)
 {
     GLint location = program_locate_uniform(program, name);
-    program_use(program);
     glUniformMatrix4fv(location, 1, GL_FALSE, &matrix.elements[0][0]);
 }

@@ -69,8 +69,8 @@ void program_use(struct program_t *program);
 /// `program_set_[type](struct program_t, const char *, [value type] value)`:
 /// Set the given named [type] uniform of the given program to the given [value type].
 ///
+/// The given program must be set to be used when this function is called.
 /// If the given uniform name cannot be located within the given program then the program terminates.
-/// The given program is set to be used during this function.
 /// @param program The program to set the uniform of.
 /// @param name The name of the [type] uniform to set.
 /// @param value The [value type] to set the given [type] uniform to.

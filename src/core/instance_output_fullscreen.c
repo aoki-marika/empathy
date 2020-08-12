@@ -45,6 +45,7 @@ void instance_output_fullscreen_output_init(struct instance_t *instance,
         program_init(&output->program, sizeof(output->shaders) / sizeof(struct shader_t), output->shaders);
 
         // set the constant uniforms
+        program_use(&output->program);
         program_set_sampler2D(&output->program,
                               "sampler",
                               INSTANCE_OUTPUT_FULLSCREEN_FRAMEBUFFER_UNIT);
