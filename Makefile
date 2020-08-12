@@ -115,7 +115,7 @@ GAME_LDFLAGS := $(CORE_LDFLAGS)
 GAME_OUT := $(BIN_DIR)/game
 
 $(GAME_OUT): $(GAME_OBJS) $(CORE_OUT) $(SYS2D_OUT) | $(BIN_DIR)
-	$(LD) $^ -o $@ $(GAME_LDFLAGS)
+	$(LD) -Wl,-whole-archive $^ -Wl,-no-whole-archive -o $@ $(GAME_LDFLAGS)
 
 $(GAME_OBJS): $(GAME_OBJ_DIR)/%.o : $(GAME_SRC_DIR)/%.c | $(GAME_OBJ_DIR)
 	$(CC) -MMD -c $< -o $@ $(GAME_CFLAGS)
