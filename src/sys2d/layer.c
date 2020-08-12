@@ -8,265 +8,26 @@
 
 // MARK: - Functions
 
-/// Set the given layer's, and optionally its children's, dirt to the given dirt.
-/// @param layer The layer to set the dirt of.
-/// @param dirt The dirt to set.
-/// @param add Whether or not the given dirt should be added to the existing dirt, instead of overwriting it.
-/// @param recursive Whether or not the given layer's children should have their dirt recursively set to the given dirt.
-void layer_set_dirt(struct layer_t *layer,
+// MARK: Layer
+
+/// Add the given dirt to the given layer's, and optionally its children's, dirt.
+/// @param layer The layer to add the given dirt to.
+/// @param dirt The dirt to add.
+/// @param include_children Whether or not the given layer's children should also have the given dirt added.
+void layer_add_dirt(struct layer_t *layer,
                     enum layer_dirt_t dirt,
-                    bool add,
-                    bool recursive)
+                    bool include_children)
 {
-    // set the given layers dirt
-    if (add)
-        layer->dirt |= dirt;
-    else
-        layer->dirt = dirt;
-
-    // set the given layers childrens dirt
-    if (recursive)
+    layer->dirt |= dirt;
+    if (include_children)
         for (int i = 0; i < layer->num_children; i++)
-            layer_set_dirt(&layer->children[i], dirt, add, true);
+            layer_add_dirt(&layer->children[i], dirt, true);
 }
 
-/// Render the given colour attachment using the current state of the given layer, initializing the given mesh with said rendered state.
-///
-/// If the given attachment is not a colour attachment then an assertion fails.
-/// @param attachment The colour attachment to render.
-/// @param mesh The mesh to initialize.
-/// @param layer The layer to use the state of to render the given attachment.
-void layer_attachment_colour_render_mesh(const struct layer_attachment_t *attachment,
-                                         struct mesh_t *mesh,
-                                         const struct layer_t *layer)
-{
-    // ensure the given attachment is a colour attachment
-    assert(attachment->type == LAYER_ATTACHMENT_COLOUR);
-
-    // create the mesh
-    // components
-    const struct mesh_component_t components[] =
-    {
-        {
-            .attribute_index = LAYER_ATTACHMENT_XYZ_ATTRIBUTE_INDEX,
-            .num_values = 3,
-            .value_type = MESH_COMPONENT_F32,
-            .padding = 0,
-        },
-        {
-            .attribute_index = LAYER_ATTACHMENT_RGBA_ATTRIBUTE_INDEX,
-            .num_values = 4,
-            .value_type = MESH_COMPONENT_F32,
-            .padding = 0,
-        },
-    };
-
-    // vertices
-    // use temporary shorthands to make the initializer shorter
-    float w = layer->properties.size.x;
-    float h = layer->properties.size.y;
-    struct colour4_t tl = attachment->colour_top_left;
-    struct colour4_t tr = attachment->colour_top_right;
-    struct colour4_t bl = attachment->colour_bottom_left;
-    struct colour4_t br = attachment->colour_bottom_right;
-    const float vertices[] =
-    {
-        0, 0, 0,    tl.r, tl.g, tl.b, tl.a, //top-left
-        w, 0, 0,    tr.r, tr.g, tr.b, tr.a, //top-right
-        0, h, 0,    bl.r, bl.g, bl.b, bl.a, //bottom-left
-        w, h, 0,    br.r, br.g, br.b, br.a, //bottom-right
-    };
-
-    // indices
-    // use two triangles to form a quad
-    const unsigned int indices[] =
-    {
-        0, 1, 2, //top-left triangle
-        1, 2, 3, //bottom-right triangle
-    };
-
-    // initialize the mesh
-    mesh_init(mesh,
-              sizeof(components) / sizeof(struct mesh_component_t),
-              components,
-              sizeof(vertices),
-              vertices,
-              sizeof(indices),
-              indices);
-}
-
-/// Render the given texture attachment using the current state of the given layer, initializing the given mesh with said rendered state.
-///
-/// If the given attachment is not a texture attachment then an assertion fails.
-/// @param attachment The texture attachment to render.
-/// @param mesh The mesh to initialize.
-/// @param layer The layer to use the state of to render the given attachment.
-void layer_attachment_texture_render_mesh(const struct layer_attachment_t *attachment,
-                                          struct mesh_t *mesh,
-                                          const struct layer_t *layer)
-{
-    // ensure the given attachment is a texture attachment
-    assert(attachment->type == LAYER_ATTACHMENT_TEXTURE);
-
-    // create the mesh
-    // components
-    // texture index is always passed regardless of whether or not it is used, to simplify mesh creation
-    const struct mesh_component_t components[] =
-    {
-        {
-            .attribute_index = LAYER_ATTACHMENT_XYZ_ATTRIBUTE_INDEX,
-            .num_values = 3,
-            .value_type = MESH_COMPONENT_F32,
-            .padding = 0,
-        },
-        {
-            .attribute_index = LAYER_ATTACHMENT_UV_ATTRIBUTE_INDEX,
-            .num_values = 2,
-            .value_type = MESH_COMPONENT_F32,
-            .padding = 0,
-        },
-        {
-            .attribute_index = LAYER_ATTACHMENT_TEXTURE_INDEX_ATTRIBUTE_INDEX,
-            .num_values = 1,
-            .value_type = MESH_COMPONENT_F32,
-            .padding = 0,
-        },
-    };
-
-    // vertices
-    // use temporary shorthands to make the initializer shorter
-    float w = layer->properties.size.x;
-    float h = layer->properties.size.y;
-    struct uv_t bl = attachment->texture_bottom_left;
-    struct uv_t tr = attachment->texture_top_right;
-    unsigned int i = attachment->texture_index;
-    const float vertices[] =
-    {
-        0, 0, 0,    bl.u, tr.v,    i, //top-left
-        w, 0, 0,    tr.u, tr.v,    i, //top-right
-        0, h, 0,    bl.u, bl.v,    i, //bottom-left
-        w, h, 0,    tr.u, bl.v,    i, //bottom-right
-    };
-
-    // indices
-    // use two triangles to form a quad
-    const unsigned int indices[] =
-    {
-        0, 1, 2, //top-left triangle
-        1, 2, 3, //bottom-right triangle
-    };
-
-    // initialize the mesh
-    mesh_init(mesh,
-              sizeof(components) / sizeof(struct mesh_component_t),
-              components,
-              sizeof(vertices),
-              vertices,
-              sizeof(indices),
-              indices);
-}
-
-/// Perform a render pass on the given layer and its children, rendering only when their dirt indicates to.
-/// @param layer The layer to render.
-void layer_render(struct layer_t *layer)
-{
-    // render the given layer, depending on its dirt
-    enum layer_dirt_t dirt = layer->dirt;
-    if (dirt & LAYER_ATTACHMENTS)
-    {
-        // attachments need to be re-rendered
-        for (int i = 0; i < layer->num_attachments; i++)
-        {
-            struct layer_attachment_t *attachment = &layer->attachments[i];
-
-            // dont need to dealloc any existing mesh as it will be immediately reused
-            if (attachment->rendered_state.mesh != NULL)
-                mesh_deinit(attachment->rendered_state.mesh);
-            else
-                attachment->rendered_state.mesh = malloc(sizeof(struct mesh_t));
-
-            // render the current attachments mesh
-            // dispatch to the appropriate mesh render function for the current attachments type
-            struct mesh_t *mesh = attachment->rendered_state.mesh;
-            switch (attachment->type)
-            {
-                case LAYER_ATTACHMENT_COLOUR:
-                    layer_attachment_colour_render_mesh(attachment,
-                                                        mesh,
-                                                        layer);
-                    break;
-                case LAYER_ATTACHMENT_TEXTURE:
-                    layer_attachment_texture_render_mesh(attachment,
-                                                         mesh,
-                                                         layer);
-                    break;
-            }
-        }
-    }
-    if (dirt & LAYER_TRANSFORM)
-    {
-        // the transform model matrix needs to be updated
-        // calculate the new matrix
-        struct vector3_t absolute_anchor = vector3(layer->rendered_state.parent_size.x * layer->properties.anchor.x,
-                                                   layer->rendered_state.parent_size.y * layer->properties.anchor.y,
-                                                   0);
-
-        struct vector3_t absolute_origin = vector3(-layer->properties.size.x * layer->properties.origin.x,
-                                                   -layer->properties.size.y * layer->properties.origin.y,
-                                                   0);
-
-        struct matrix4_t model = layer->rendered_state.parent_transform_world;
-        model = matrix4_multiply(model, matrix4_translation(absolute_origin));
-        model = matrix4_multiply(model, matrix4_translation(absolute_anchor));
-
-        // set the new matrix
-        layer->rendered_state.transform_world = model;
-    }
-
-    // render the given layers children, passing any rendered state from their parent
-    for (int i = 0; i < layer->num_children; i++)
-    {
-        struct layer_t *child = &layer->children[i];
-        child->rendered_state.parent_size = layer->properties.size;
-        child->rendered_state.parent_transform_world = layer->rendered_state.transform_world;
-        layer_render(child);
-    }
-
-    // reset the given layers dirt to reflect that the changes have been rendered
-    layer_set_dirt(layer, 0x0, false, false);
-}
-
-/// Get the index of the first child layer matching the given unique identifier within the given layer's children.
-/// @param child_id The unique identifier of the child layer to get the index of.
-/// @param layer The layer containing the layer to get the index of.
-/// @return The index of the first child layer matching the given unique identifier within the given layer's children.
-/// If no matches were found then `-1` is returned instead.
-int layer_get_child_index(struct layer_t *layer,
-                          layer_id_t child_id)
-{
-    // attempt to return the index of the first layer matching the given id within the given layers children
-    for (int i = 0; i < layer->num_children; i++)
-    {
-        struct layer_t *child_layer = &layer->children[i];
-        if (child_layer->id == child_id)
-            return i;
-    }
-
-    // if this point has been reached then no match was found
-    return -1;
-}
-
-/// Initialize the given layer as a root layer with the given properties and attachments, without performing a render pass on it.
+/// Initialize the given layer as a root layer with the given properties.
 /// @param layer The layer to initialize.
 /// @param id The unique identifier of the new layer, within its parent's children.
-/// @param anchor The normalized point, within the new layer's parent, that it anchors its centre to.
-/// @param origin The normalized point, within the new layer, that it centres itself on.
-/// @param size The size of the new layer, in pixels.
-/// @param properties The properties of the new layer.
-/// @param num_attachments The total number of given attachments.
-/// @param attachments All the attachments to attach to the new layer.
-/// The elements of this array are copied, so it does not need to remain accessible.
-/// It is expected that the properties of each attachment are available for the entire lifetime of the new layer.
+/// See `layer_properties_t` for property documentation.
 void layer_init_dirty(struct layer_t *layer,
                       layer_id_t id,
                       struct vector2_t anchor,
@@ -278,14 +39,13 @@ void layer_init_dirty(struct layer_t *layer,
     layer->properties.anchor = anchor;
     layer->properties.origin = origin;
     layer->properties.size = size;
-    layer->next_child_id = 0;
+    layer->dirt = LAYER_TRANSFORM;
+    layer->next_attachment_id = 0;
     layer->num_attachments = 0;
     layer->attachments = malloc(0);
+    layer->next_child_id = 0;
     layer->num_children = 0;
     layer->children = malloc(0);
-
-    // set the dirt
-    layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true, true);
 }
 
 void layer_init(struct layer_t *layer,
@@ -298,11 +58,9 @@ void layer_init(struct layer_t *layer,
                      vector2_zero(),
                      size);
 
-    // perform the first render pass
-    // set defaults for rendered parent state as it will never be set otherwise
+    // set defaults for parents rendered state as it will never be set otherwise
     layer->rendered_state.parent_size = vector2_zero();
     layer->rendered_state.parent_transform_world = matrix4_identity();
-    layer_render(layer);
 }
 
 void layer_deinit(struct layer_t *layer)
@@ -312,17 +70,103 @@ void layer_deinit(struct layer_t *layer)
         layer_deinit(&layer->children[i]);
     free(layer->children);
 
-    // meshes
+    // attachments
+    for (int i = 0; i < layer->num_attachments; i++)
+        attachment_deinit(&layer->attachments[i]);
+    free(layer->attachments);
+}
+
+void layer_set_anchor(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.anchor = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
+void layer_set_origin(struct layer_t *layer,
+                      struct vector2_t value)
+{
+    layer->properties.origin = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
+void layer_set_size(struct layer_t *layer,
+                    struct vector2_t value)
+{
+    layer->properties.size = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+
+    // attachments need to re-render their mesh for size changes
+    for (int i = 0; i < layer->num_attachments; i++)
+        layer->attachments[i].dirt |= ATTACHMENT_MESH;
+}
+
+void layer_render(struct layer_t *layer)
+{
+    // render the given layer, depending on its dirt
+    enum layer_dirt_t dirt = layer->dirt;
+    if (dirt & LAYER_TRANSFORM)
+    {
+        // the transform matrix needs to be recalculated
+        // calculate and set the new matrix
+        struct vector3_t absolute_anchor = vector3(layer->rendered_state.parent_size.x * layer->properties.anchor.x,
+                                                   layer->rendered_state.parent_size.y * layer->properties.anchor.y,
+                                                   0);
+
+        struct vector3_t absolute_origin = vector3(-layer->properties.size.x * layer->properties.origin.x,
+                                                   -layer->properties.size.y * layer->properties.origin.y,
+                                                   0);
+
+        struct matrix4_t model = layer->rendered_state.parent_transform_world;
+        model = matrix4_multiply(model, matrix4_translation(absolute_origin));
+        model = matrix4_multiply(model, matrix4_translation(absolute_anchor));
+        layer->rendered_state.transform_world = model;
+    }
+
+    // perform a render pass on the given layers attachments
     for (int i = 0; i < layer->num_attachments; i++)
     {
-        struct layer_attachment_t *attachment = &layer->attachments[i];
-        if (attachment->rendered_state.mesh != NULL)
-        {
-            mesh_deinit(attachment->rendered_state.mesh);
-            free(attachment->rendered_state.mesh);
-        }
+        struct attachment_t *attachment = &layer->attachments[i];
+        attachment_render(attachment, layer->properties.size);
     }
-    free(layer->attachments);
+
+    // perform a render pass on the given layers children, passing any rendered state from their parent
+    for (int i = 0; i < layer->num_children; i++)
+    {
+        struct layer_t *child = &layer->children[i];
+
+        if (dirt & LAYER_TRANSFORM)
+        {
+            child->rendered_state.parent_size = layer->properties.size;
+            child->rendered_state.parent_transform_world = layer->rendered_state.transform_world;
+        }
+
+        layer_render(child);
+    }
+
+    // reset the given layers dirt, as it has now been applied
+    layer->dirt = 0x0;
+}
+
+// MARK: Children
+
+/// Get the index of the first child layer matching the given unique identifier within the given layer's children.
+/// @param layer The layer containing the child layer to get the index of.
+/// @param child_id The unique identifier of the child layer to get the index of.
+/// @return The index of the first child layer matching the given unique identifier within the given layer's children.
+/// If no match was found then `-1` is returned instead.
+int layer_get_child_index(struct layer_t *layer,
+                          layer_id_t child_id)
+{
+    for (int i = 0; i < layer->num_children; i++)
+    {
+        struct layer_t *child_layer = &layer->children[i];
+        if (child_layer->id == child_id)
+            return i;
+    }
+
+    // if this point has been reached then no match was found
+    return -1;
 }
 
 void layer_add_child(struct layer_t *layer,
@@ -344,10 +188,6 @@ void layer_add_child(struct layer_t *layer,
                      anchor,
                      origin,
                      size);
-
-    // perform the first render pass
-    // the parent is rendered to allow the parents rendered state to be set on the child
-    layer_render(layer);
 
     // set the given child id pointers value, if there is one
     if (child_id != NULL)
@@ -390,65 +230,111 @@ struct layer_t *layer_get_child(struct layer_t *layer,
         return NULL;
 }
 
-void layer_set_anchor(struct layer_t *layer,
-                      struct vector2_t value)
+// MARK: Attachment
+
+/// Get the index of the first attachment matching the given unique identifier within the given layer's attachments.
+/// @param layer The layer containing the attachment to get the index of.
+/// @param id The unique identifier of the attachment to get the index of.
+/// @return The index of the first attachment matching the given unique identifier within the given layer's attachments.
+/// If no match was found then `-1` is returned instead.
+int layer_get_attachment_index(struct layer_t *layer,
+                               attachment_id_t id)
 {
-    layer->properties.anchor = value;
-    layer_set_dirt(layer, LAYER_TRANSFORM, true, true);
-    layer_render(layer);
+    for (int i = 0; i < layer->num_attachments; i++)
+    {
+        struct attachment_t *attachment = &layer->attachments[i];
+        if (attachment->id == id)
+            return i;
+    }
+
+    // if this point has been reached then no match was found
+    return -1;
 }
 
-void layer_set_origin(struct layer_t *layer,
-                      struct vector2_t value)
-{
-    layer->properties.origin = value;
-    layer_set_dirt(layer, LAYER_TRANSFORM, true, true);
-    layer_render(layer);
-}
-
-void layer_set_size(struct layer_t *layer,
-                    struct vector2_t value)
-{
-    layer->properties.size = value;
-    layer_set_dirt(layer, LAYER_ATTACHMENTS | LAYER_TRANSFORM, true, true);
-    layer_render(layer);
-}
-
+/// Add the given initialized attachment to the given layer's attachments.
+/// @param layer The layer to add the given attachment to.
+/// @param attachment The initialized attachment to add.
 void layer_add_attachment(struct layer_t *layer,
-                          struct layer_attachment_t attachment)
+                          struct attachment_t attachment)
 {
-    // insert the new attachment
+    // insert the given attachment
     unsigned int index = layer->num_attachments++;
     layer->attachments = realloc(layer->attachments,
-                                 layer->num_attachments * sizeof(struct layer_attachment_t));
+                                 layer->num_attachments * sizeof(struct attachment_t));
 
-    // copy the given attachment in
-    struct layer_attachment_t *new_attachment = &layer->attachments[index];
-    *new_attachment = attachment;
-    new_attachment->rendered_state.mesh = NULL;
+    layer->attachments[index] = attachment;
+}
 
-    // perform the first render pass for the new attachment
-    layer_set_dirt(layer, LAYER_ATTACHMENTS, true, false);
-    layer_render(layer);
+void layer_add_attachment_colour(struct layer_t *layer,
+                                 struct colour4_t top_left,
+                                 struct colour4_t top_right,
+                                 struct colour4_t bottom_left,
+                                 struct colour4_t bottom_right)
+{
+    // initialize the new colour attachment
+    struct attachment_t attachment;
+    attachment_init_colour(&attachment,
+                           layer->next_attachment_id++,
+                           top_left,
+                           top_right,
+                           bottom_left,
+                           bottom_right);
+
+    // add the new colour attachment
+    layer_add_attachment(layer, attachment);
+}
+
+void layer_add_attachment_texture(struct layer_t *layer,
+                                  struct texture_t *source,
+                                  unsigned int source_index,
+                                  struct uv_t bottom_left,
+                                  struct uv_t top_right)
+{
+    // initialize the new texture attachment
+    struct attachment_t attachment;
+    attachment_init_texture(&attachment,
+                            layer->next_attachment_id++,
+                            source,
+                            source_index,
+                            bottom_left,
+                            top_right);
+
+    // add the new texture attachment
+    layer_add_attachment(layer, attachment);
 }
 
 void layer_remove_attachment(struct layer_t *layer,
-                             unsigned int index)
+                             attachment_id_t id)
 {
-    // deinitialize the attachments render state before removing it
-    struct layer_attachment_t *attachment = &layer->attachments[index];
-    if (attachment->rendered_state.mesh != NULL)
+    // attempt to get the index of the attachment to remove
+    int index = layer_get_attachment_index(layer, id);
+    if (index < 0)
     {
-        mesh_deinit(attachment->rendered_state.mesh);
-        free(attachment->rendered_state.mesh);
+        // the attachment could not be found, print the details and terminate
+        fprintf(stderr, "LAYER ERROR: could not locate attachment %u within layer %p\n", id, layer);
+        exit(EXIT_FAILURE);
     }
+
+    // deinitialize the attachment before removing it
+    struct attachment_t *attachment = &layer->attachments[index];
+    attachment_deinit(attachment);
 
     // shuffle and reallocate the layers attachments array to remove the attachments element
     memmove(&layer->attachments[index],
             &layer->attachments[index + 1],
-            (layer->num_attachments - (index + 1)) * sizeof(struct layer_attachment_t));
+            (layer->num_attachments - (index + 1)) * sizeof(struct attachment_t));
 
     layer->num_attachments--;
     layer->attachments = realloc(layer->attachments,
-                                 layer->num_attachments * sizeof(struct layer_attachment_t));
+                                 layer->num_attachments * sizeof(struct attachment_t));
+}
+
+struct attachment_t *layer_get_attachment(struct layer_t *layer,
+                                          attachment_id_t id)
+{
+    int index = layer_get_attachment_index(layer, id);
+    if (index >= 0)
+        return &layer->attachments[index];
+    else
+        return NULL;
 }

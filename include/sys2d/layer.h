@@ -1,56 +1,25 @@
 #pragma once
 
 #include <core/vector.h>
-#include <core/colour.h>
-#include <core/texture.h>
-#include <core/uv.h>
-#include <core/mesh.h>
 #include <core/matrix.h>
 
+#include "attachment.h"
+
 ///
-/// Layers are the core of Sys2D; defining scene graphs, their contents, rendering state, and providing drawing information.
+/// Layers are the core of Sys2D, defining scene graphs, their nodes, rendering state, and providing layout information.
 ///
 /// A layer can have children, of which use their parent's properties as a base for their own when rendering.
 /// For example, if a child has position `0,0` within a parent with position `50,50`, then the rendered position is `50,50`.
 ///
-/// The visual contents of a layer are defined by "attachments".
-/// Each attachment can be one of several types:
-///  - Colour: The layer is a flat colour.
-///  - Texture: The layer samples UV coordinates of a texture.
-/// These attachments can then be switched between with animations to create effects such as a sprite animation.
-///
 /// For optimization, layers have their state rendered as little as possible.
 /// To do this layers have "dirt"; an indication of properties that have changed since the last time the layer was rendered.
 /// This then determines which parts of the layer need to be re-rendered when performing a render pass.
-/// Render passes are performed automatically by various mutating layer functions, when appropriate.
 ///
 
 // MARK: - Type Definitions
 
 /// A unique identifier for a layer, within its parent's children.
 typedef unsigned int layer_id_t;
-
-// MARK: - Macros
-
-/// The index of the vertex attribute that layer attachments bind their XYZ positions to.
-///
-/// XYZ coordinates are in pixels, with a top-left origin.
-#define LAYER_ATTACHMENT_XYZ_ATTRIBUTE_INDEX           (0)
-
-/// The index of the vertex attribute that layer attachments bind their RGBA colours to.
-///
-/// RGBA components are normalized from `0` to `1`.
-#define LAYER_ATTACHMENT_RGBA_ATTRIBUTE_INDEX          (1)
-
-/// The index of the vertex attribute that layer attachments bind their texture UV coordinates to.
-///
-/// UV components are normalized from `0` to `1`, with a bottom-left origin.
-#define LAYER_ATTACHMENT_UV_ATTRIBUTE_INDEX            (2)
-
-/// The index of the vertex attribute that layer attachments bind their texture array index to.
-///
-/// Texture indices are in elements.
-#define LAYER_ATTACHMENT_TEXTURE_INDEX_ATTRIBUTE_INDEX (3)
 
 // MARK: - Data Structures
 
@@ -76,11 +45,8 @@ struct layer_t
     /// All the properties of this layer affected by changes which have occurred within this layer since the last render pass.
     enum layer_dirt_t
     {
-        /// Attachment's rendered states.
-        LAYER_ATTACHMENTS = 1 << 0,
-
-        /// Transform model matrices.
-        LAYER_TRANSFORM   = 1 << 1,
+        /// Transform matrix.
+        LAYER_TRANSFORM = 1 << 0,
     } dirt;
 
     /// The last rendered state of this layer.
@@ -96,75 +62,16 @@ struct layer_t
         struct matrix4_t transform_world;
     } rendered_state;
 
+    /// The unique identifier for the next attachment added to this layer.
+    attachment_id_t next_attachment_id;
+
     /// The total number of attachments attached to this layer.
     unsigned int num_attachments;
 
     /// All the attachments attached to this layer.
     ///
     /// Allocated.
-    struct layer_attachment_t
-    {
-        /// The type of this attachment.
-        enum layer_attachment_type_t
-        {
-            /// The layer renders colours in each corner which it interpolates between.
-            LAYER_ATTACHMENT_COLOUR,
-
-            /// The layer renders a texture, sampling it using UV bounds.
-            LAYER_ATTACHMENT_TEXTURE,
-        } type;
-
-        ///
-        /// `LAYER_ATTACHMENT_COLOUR` properties.
-        ///
-
-        /// The colour of the top-left corner of this attachment.
-        struct colour4_t colour_top_left;
-
-        /// The colour of the top-right corner of this attachment.
-        struct colour4_t colour_top_right;
-
-        /// The colour of the bottom-left corner of this attachment.
-        struct colour4_t colour_bottom_left;
-
-        /// The colour of the bottom-right corner of this attachment.
-        struct colour4_t colour_bottom_right;
-
-        ///
-        /// `LAYER_ATTACHMENT_TEXTURE` properties.
-        ///
-
-        /// The texture of which this attachment samples.
-        ///
-        /// The lifetime of this texture is handled by the creator of this attachment.
-        struct texture_t *texture;
-
-        /// The index, within this attachment's array texture, of the texture that this attachment samples.
-        ///
-        /// This is only used if `texture` is of type `TEXTURE_2D_ARRAY`.
-        unsigned int texture_index;
-
-        /// The bottom-left UV coordinates of the bounds that this attachment samples its texture from.
-        struct uv_t texture_bottom_left;
-
-        /// The top-right UV coordinates of the bounds that this attachment samples its texture from.
-        struct uv_t texture_top_right;
-
-        ///
-        /// Render state properties.
-        ///
-
-        /// The last rendered state of this attachment.
-        struct layer_attachment_rendered_state_t
-        {
-            /// The mesh used to draw the attachment, if any.
-            ///
-            /// Only size is accounted for in this mesh;
-            /// anchor, origin, position, and other animatable or parent-relative properties must be applied when drawing.
-            /// Allocated.
-            struct mesh_t *mesh;
-        } rendered_state;
-    } *attachments;
+    struct attachment_t *attachments;
 
     /// The unique identifier for the next child layer added to this layer.
     layer_id_t next_child_id;
@@ -181,9 +88,11 @@ struct layer_t
 
 // MARK: - Functions
 
-/// Initialize the given layer as a root layer with the given parameters.
+// MARK: Layer
+
+/// Initialize the given layer as a root layer with the given properties.
 /// @param layer The layer to initialize.
-/// @param size The size of the new layer, in pixels.
+/// See `layer_properties_t` for property documentation.
 void layer_init(struct layer_t *layer,
                 struct vector2_t size);
 
@@ -191,14 +100,34 @@ void layer_init(struct layer_t *layer,
 /// @param layer The layer to deinitialize.
 void layer_deinit(struct layer_t *layer);
 
-/// Add a new child layer to the given layer's children with the given parameters.
+///
+/// Layer property set functions.
+/// See `layer_properties_t` for documentation on the properties set by each.
+///
+
+void layer_set_anchor(struct layer_t *layer,
+                      struct vector2_t value);
+
+void layer_set_origin(struct layer_t *layer,
+                      struct vector2_t value);
+
+void layer_set_size(struct layer_t *layer,
+                    struct vector2_t value);
+
+/// Perform a render pass on the given layer and its children, re-rendering any properties that have changed since the last render pass.
+///
+/// This must be called before the given layer is drawn when it is initialized or when its properties change.
+/// Layers on their own will not perform a render pass, which will leave the rendered state empty.
+/// @param layer The layer to render.
+void layer_render(struct layer_t *layer);
+
+// MARK: Children
+
+/// Add a new child layer to the given layer's children with the given properties.
 /// @param layer The layer to add the new child layer to the children of.
-/// It is expected that this layer is available for the entire lifetime of the new child layer.
 /// @param child_id The pointer to set the value of to the unique identifier of the new child layer, within the given layer's children.
 /// If this is `NULL` then it is not set.
-/// @param anchor The normalized point, within the new child layer's parent, that it anchors its centre to.
-/// @param origin The normalized point, within the new child layer, that it centres itself on.
-/// @param size The size of the new child layer, in pixels.
+/// See `layer_properties_t` for property documentation.
 void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
                      struct vector2_t anchor,
@@ -222,35 +151,43 @@ void layer_remove_child(struct layer_t *layer,
 struct layer_t *layer_get_child(struct layer_t *layer,
                                 layer_id_t child_id);
 
-/// Set the anchor of the given layer to the given value.
-/// @param layer The layer to set the anchor of.
-/// @param value The anchor to set.
-void layer_set_anchor(struct layer_t *layer,
-                      struct vector2_t value);
+// MARK: Attachments
 
-/// Set the origin of the given layer to the given value.
-/// @param layer The layer to set the origin of.
-/// @param value The origin to set.
-void layer_set_origin(struct layer_t *layer,
-                      struct vector2_t value);
+/// Add a new colour attachment with the given properties to the given layer's attachments.
+/// @param layer The layer to add the new colour attachment to.
+/// @param id The pointer to set the value of to the unique identifier of the new colour attachment, within the given layer's attachments.
+/// If this is `NULL` then it is not set.
+/// See `attachment_colour_t` for property documentation.
+void layer_add_attachment_colour(struct layer_t *layer,
+                                 struct colour4_t top_left,
+                                 struct colour4_t top_right,
+                                 struct colour4_t bottom_left,
+                                 struct colour4_t bottom_right);
 
-/// Set the size of the given layer to the given value.
-/// @param layer The layer to set the size of.
-/// @param value The size to set.
-void layer_set_size(struct layer_t *layer,
-                    struct vector2_t value);
+/// Add a new texture attachment with the given properties to the given layer's attachments.
+/// @param layer The layer to add the new texture attachment to.
+/// @param id The pointer to set the value of to the unique identifier of the new texture attachment, within the given layer's attachments.
+/// If this is `NULL` then it is not set.
+/// See `attachment_texture_t` for property documentation.
+void layer_add_attachment_texture(struct layer_t *layer,
+                                  struct texture_t *source,
+                                  unsigned int source_index,
+                                  struct uv_t bottom_left,
+                                  struct uv_t top_right);
 
-/// Add the given attachment to the given layer.
-/// @param layer The layer to add the attachment to.
-/// @param attachment The attachment to add.
-/// It is expected that the properties of this attachment are available for the entire lifetime of the given layer.
-void layer_add_attachment(struct layer_t *layer,
-                          struct layer_attachment_t attachment);
-
-/// Remove the attachment at the given index from the given layer.
+/// Remove the first attachment matching the given unique identifier within the given layer's attachments, deinitializing it.
 ///
-/// If the given index is out of bounds of the given layer's attachments then an assertion fails.
-/// @param layer The layer to remove the attachment from.
-/// @param index The index of the attachment to remove within the given layer's attachments.
+/// If no attachment matching the given unique identifier is found within the given layer's attachment then the program terminates.
+/// @param layer The layer containing the attachment to remove.
+/// @param id The unique identifier of the attachment to remove.
 void layer_remove_attachment(struct layer_t *layer,
-                             unsigned int index);
+                             attachment_id_t id);
+
+/// Get the first attachment matching the given unique identifier within the given layer's attachments, if any.
+/// @param layer The layer containing the attachment to get.
+/// @param id The unique identifier of the attachment to get.
+/// @return A pointer to the first attachment matching the given unique identifier within the given layer's attachments.
+/// This pointer is only available until the given layer's attachments are modified.
+/// If no matches were found then `NULL` is returned instead.
+struct attachment_t *layer_get_attachment(struct layer_t *layer,
+                                          attachment_id_t id);
