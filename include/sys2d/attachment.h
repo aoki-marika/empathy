@@ -159,3 +159,32 @@ void attachment_deinit(struct attachment_t *attachment);
 /// @param size The size to render the given attachment at, in pixels.
 void attachment_render(struct attachment_t *attachment,
                        struct vector2_t size);
+
+///
+/// Attachment property set functions.
+/// See `attachment_colour_properties_t` and `attachment_texture_properties_t` for documentation on the properties set by each.
+///
+
+void attachment_set_colour_top_left(struct attachment_t *attachment,
+                                    struct colour4_t value);
+
+void attachment_set_colour_top_right(struct attachment_t *attachment,
+                                     struct colour4_t value);
+
+void attachment_set_colour_bottom_left(struct attachment_t *attachment,
+                                       struct colour4_t value);
+
+void attachment_set_colour_bottom_right(struct attachment_t *attachment,
+                                        struct colour4_t value);
+
+void attachment_set_texture_source(struct attachment_t *attachment,
+                                   struct texture_t *value);
+
+void attachment_set_texture_source_index(struct attachment_t *attachment,
+                                         unsigned int value);
+
+void attachment_set_texture_bottom_left(struct attachment_t *attachment,
+                                        struct uv_t value);
+
+void attachment_set_texture_top_right(struct attachment_t *attachment,
+                                      struct uv_t value);

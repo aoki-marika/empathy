@@ -234,3 +234,58 @@ void attachment_render(struct attachment_t *attachment,
     // reset the given attachments dirt, as it has now been applied
     attachment->dirt = ATTACHMENT_NONE;
 }
+
+void attachment_set_colour_top_left(struct attachment_t *attachment,
+                                    struct colour4_t value)
+{
+    attachment->colour_properties.top_left = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_colour_top_right(struct attachment_t *attachment,
+                                     struct colour4_t value)
+{
+    attachment->colour_properties.top_right = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_colour_bottom_left(struct attachment_t *attachment,
+                                       struct colour4_t value)
+{
+    attachment->colour_properties.bottom_left = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_colour_bottom_right(struct attachment_t *attachment,
+                                        struct colour4_t value)
+{
+    attachment->colour_properties.bottom_right = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_texture_source(struct attachment_t *attachment,
+                                   struct texture_t *value)
+{
+    attachment->texture_properties.source = value;
+}
+
+void attachment_set_texture_source_index(struct attachment_t *attachment,
+                                         unsigned int value)
+{
+    attachment->texture_properties.source_index = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_texture_bottom_left(struct attachment_t *attachment,
+                                        struct uv_t value)
+{
+    attachment->texture_properties.bottom_left = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
+
+void attachment_set_texture_top_right(struct attachment_t *attachment,
+                                      struct uv_t value)
+{
+    attachment->texture_properties.top_right = value;
+    attachment->dirt |= ATTACHMENT_MESH;
+}
