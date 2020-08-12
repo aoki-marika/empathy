@@ -142,7 +142,7 @@ void texture_init_png(struct texture_t *texture,
                  png->data);
 
     // generate the mipmap now that the texture is populated
-    glGenerateMipmap(id);
+    glGenerateMipmap(gl_target);
 
     // initialize the given texture
     texture->width = png->width;
