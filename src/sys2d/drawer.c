@@ -175,22 +175,28 @@ void drawer_deinit(struct drawer_t *drawer)
 void layer_draw(const struct layer_t *layer,
                 struct drawer_t *drawer)
 {
-    // if there are no attachments then the layer cannot be drawn
+    // get the attachment to draw
+    const struct attachment_t *attachment = NULL;
     if (layer->num_attachments > 0)
-    {
-        // get the attachment to draw
-        // TODO: proper attachment selection
-        const struct layer_attachment_t *attachment = &layer->attachments[0];
+        attachment = &layer->attachments[0];
 
-        // get the program to use to draw the attachment
+    // get the mesh to draw
+    const struct mesh_t *mesh = NULL;
+    if (attachment->rendered_state.mesh != NULL)
+        mesh = attachment->rendered_state.mesh;
+
+    // draw the attachment, if there is one and it has a rendered mesh
+    if (attachment != NULL && mesh != NULL)
+    {
+        // get the shader program to use to draw the mesh
         struct program_t *program;
         switch (attachment->type)
         {
-            case LAYER_ATTACHMENT_COLOUR:
+            case ATTACHMENT_COLOUR:
                 program = &drawer->program_colour;
                 break;
-            case LAYER_ATTACHMENT_TEXTURE:
-                switch (attachment->texture->type)
+            case ATTACHMENT_TEXTURE:
+                switch (attachment->texture.source->type)
                 {
                     case TEXTURE_2D:
                         program = &drawer->program_texture_2d;
@@ -202,14 +208,23 @@ void layer_draw(const struct layer_t *layer,
                 break;
         }
 
-        // configure the program
+        // configure the shader program
         program_use(program);
         program_set_mat4(program, "model", layer->rendered_state.transform_world);
-        if (attachment->type == LAYER_ATTACHMENT_TEXTURE)
-            texture_bind(attachment->texture, DRAWER_UNIT);
 
-        // draw the attachment
-        mesh_draw(attachment->rendered_state.mesh);
+        // draw the mesh
+        switch (attachment->type)
+        {
+            case ATTACHMENT_TEXTURE:
+                // if there is no texture source then dont draw the mesh
+                if (attachment->texture.source == NULL)
+                    break;
+
+                texture_bind(attachment->texture.source, DRAWER_UNIT);
+            default:
+                mesh_draw(mesh);
+                break;
+        }
     }
 
     // draw the given layers children
