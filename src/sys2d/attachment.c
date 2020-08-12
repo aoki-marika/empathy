@@ -131,12 +131,14 @@ void attachment_texture_render_mesh(struct attachment_texture_t *attachment,
 }
 
 void attachment_init_colour(struct attachment_t *attachment,
+                            attachment_id_t id,
                             struct colour4_t top_left,
                             struct colour4_t top_right,
                             struct colour4_t bottom_left,
                             struct colour4_t bottom_right)
 {
     // initialize the given attachment
+    attachment->id = id;
     attachment->type = ATTACHMENT_COLOUR;
     attachment->dirt = ATTACHMENT_MESH;
     attachment->colour.top_left = top_left;
@@ -147,12 +149,14 @@ void attachment_init_colour(struct attachment_t *attachment,
 }
 
 void attachment_init_texture(struct attachment_t *attachment,
+                             attachment_id_t id,
                              struct texture_t *source,
                              unsigned int source_index,
                              struct uv_t bottom_left,
                              struct uv_t top_right)
 {
     // initialize the given attachment
+    attachment->id = id;
     attachment->type = ATTACHMENT_TEXTURE;
     attachment->dirt = ATTACHMENT_MESH;
     attachment->texture.source = source;
