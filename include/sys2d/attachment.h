@@ -13,7 +13,7 @@
 ///  - Colour: The attachment draws a quad with colours in each corner, interpolating between them.
 ///  - Texture: The attachment draws a quad with a texture on it, sampling the texture within UV bounds.
 ///
-/// Attachments follow the same rendering system as layers, re-rendering as little as possible and using dirt to track changes affecting rendered state.
+/// Attachments follow the same rendering system as layers, re-rendering as little as possible and using dirt to track changes affecting render results.
 /// See `layer.h` for further documentation on this.
 ///
 
@@ -112,15 +112,15 @@ struct attachment_t
         struct uv_t top_right;
     } texture_properties;
 
-    /// The last rendered state of this attachment.
-    struct attachment_rendered_state_t
+    /// The result of the last render pass performed on this attachment.
+    struct attachment_render_result_t
     {
         /// The mesh of the attachment, if any.
         ///
         /// Only size is accounted for in this mesh; positional or otherwise properties must be handled by the drawer.
         /// Allocated.
         struct mesh_t *mesh;
-    } rendered_state;
+    } render_result;
 };
 
 // MARK: - Functions
@@ -154,7 +154,7 @@ void attachment_deinit(struct attachment_t *attachment);
 /// Perform a render pass on the given attachment, re-rendering any properties that have changed since the last render pass.
 ///
 /// This must be called before the given attachment is drawn when it is initialized or when its properties change.
-/// Attachments on their own will not perform a render pass, which will leave the rendered state empty.
+/// Attachments on their own will not perform a render pass, which will leave the render result empty.
 /// @param attachment The attachment to render.
 /// @param size The size to render the given attachment at, in pixels.
 void attachment_render(struct attachment_t *attachment,

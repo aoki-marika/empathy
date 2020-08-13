@@ -52,8 +52,8 @@ struct layer_t
         LAYER_TRANSFORM = 1 << 0,
     } dirt;
 
-    /// The last rendered state of this layer.
-    struct layer_rendered_state_t
+    /// The result of the last render pass performed on this layer.
+    struct layer_render_result_t
     {
         /// The size of the layer's parent, in pixels.
         struct vector2_t parent_size;
@@ -63,7 +63,7 @@ struct layer_t
 
         /// The world-space transform model matrix of the layer.
         struct matrix4_t transform_world;
-    } rendered_state;
+    } render_result;
 
     /// The unique identifier for the next attachment added to this layer.
     attachment_id_t next_attachment_id;
@@ -106,7 +106,7 @@ void layer_deinit(struct layer_t *layer);
 /// Perform a render pass on the given layer and its children, re-rendering any properties that have changed since the last render pass.
 ///
 /// This must be called before the given layer is drawn when it is initialized or when its properties change.
-/// Layers on their own will not perform a render pass, which will leave the rendered state empty.
+/// Layers on their own will not perform a render pass, which will leave the render result empty.
 /// @param layer The layer to render.
 void layer_render(struct layer_t *layer);
 

@@ -182,8 +182,8 @@ void layer_draw(const struct layer_t *layer,
 
     // get the mesh to draw
     const struct mesh_t *mesh = NULL;
-    if (attachment->rendered_state.mesh != NULL)
-        mesh = attachment->rendered_state.mesh;
+    if (attachment->render_result.mesh != NULL)
+        mesh = attachment->render_result.mesh;
 
     // draw the attachment, if there is one and it has a rendered mesh
     if (attachment != NULL && mesh != NULL)
@@ -216,7 +216,7 @@ void layer_draw(const struct layer_t *layer,
         if (program != NULL)
         {
             program_use(program);
-            program_set_mat4(program, "model", layer->rendered_state.transform_world);
+            program_set_mat4(program, "model", layer->render_result.transform_world);
         }
 
         // draw the mesh

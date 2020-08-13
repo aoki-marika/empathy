@@ -153,8 +153,8 @@ void attachment_init(struct attachment_t *attachment,
     attachment->texture_properties.bottom_left = uv(0, 0);
     attachment->texture_properties.top_right = uv(1, 1);
 
-    // rendered state
-    attachment->rendered_state.mesh = NULL;
+    // render result
+    attachment->render_result.mesh = NULL;
 }
 
 void attachment_init_colour(struct attachment_t *attachment,
@@ -191,7 +191,7 @@ void attachment_init_texture(struct attachment_t *attachment,
 
 void attachment_deinit(struct attachment_t *attachment)
 {
-    struct mesh_t *mesh = attachment->rendered_state.mesh;
+    struct mesh_t *mesh = attachment->render_result.mesh;
     if (mesh != NULL)
     {
         mesh_deinit(mesh);
@@ -209,7 +209,7 @@ void attachment_render(struct attachment_t *attachment,
         // the mesh needs to be re-initialized
         // get the mesh to initialize
         // if the mesh is already allocated then it only needs to be reinitialized
-        struct mesh_t **mesh = &attachment->rendered_state.mesh;
+        struct mesh_t **mesh = &attachment->render_result.mesh;
         if (*mesh != NULL)
             mesh_deinit(*mesh);
         else

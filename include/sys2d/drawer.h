@@ -5,7 +5,7 @@
 #include "layer.h"
 
 ///
-/// Drawers are used to hold common state which is used to draw the rendered state of layers and their children to graphics contexts.
+/// Drawers are used to hold common state which is used to draw the render results of layers to graphics contexts.
 ///
 /// Drawers are not tied to individual layers, instead there is intended to be one drawer per-program which draws all the layers within said program.
 ///
@@ -56,7 +56,7 @@ void drawer_init(struct drawer_t *drawer,
 /// @param drawer The drawer to deinitialize.
 void drawer_deinit(struct drawer_t *drawer);
 
-/// Draw the last rendered state of the given layer and its children using the given drawer to the current graphics context.
+/// Draw the last render result of the given layer and its children using the given drawer to the current graphics context.
 /// @param layer The layer to draw.
 /// @param drawer The drawer to draw the given layer with.
 void layer_draw(const struct layer_t *layer,

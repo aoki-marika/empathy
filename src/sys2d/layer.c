@@ -35,14 +35,26 @@ void layer_init_dirty(struct layer_t *layer,
                       struct vector2_t size)
 {
     // initialize the given layer
+    // layer
     layer->id = id;
+    layer->dirt = LAYER_TRANSFORM;
+
+    // properties
     layer->properties.anchor = anchor;
     layer->properties.origin = origin;
     layer->properties.size = size;
-    layer->dirt = LAYER_TRANSFORM;
+
+    // render result
+    layer->render_result.parent_size = vector2_zero();
+    layer->render_result.parent_transform_world = matrix4_identity();
+    layer->render_result.transform_world = matrix4_identity();
+
+    // attachments
     layer->next_attachment_id = 0;
     layer->num_attachments = 0;
     layer->attachments = malloc(0);
+
+    // children
     layer->next_child_id = 0;
     layer->num_children = 0;
     layer->children = malloc(0);
@@ -57,10 +69,6 @@ void layer_init(struct layer_t *layer,
                      vector2_zero(),
                      vector2_zero(),
                      size);
-
-    // set defaults for parents rendered state as it will never be set otherwise
-    layer->rendered_state.parent_size = vector2_zero();
-    layer->rendered_state.parent_transform_world = matrix4_identity();
 }
 
 void layer_deinit(struct layer_t *layer)
@@ -84,18 +92,18 @@ void layer_render(struct layer_t *layer)
     {
         // the transform matrix needs to be recalculated
         // calculate and set the new matrix
-        struct vector3_t absolute_anchor = vector3(layer->rendered_state.parent_size.x * layer->properties.anchor.x,
-                                                   layer->rendered_state.parent_size.y * layer->properties.anchor.y,
+        struct vector3_t absolute_anchor = vector3(layer->render_result.parent_size.x * layer->properties.anchor.x,
+                                                   layer->render_result.parent_size.y * layer->properties.anchor.y,
                                                    0);
 
         struct vector3_t absolute_origin = vector3(-layer->properties.size.x * layer->properties.origin.x,
                                                    -layer->properties.size.y * layer->properties.origin.y,
                                                    0);
 
-        struct matrix4_t model = layer->rendered_state.parent_transform_world;
+        struct matrix4_t model = layer->render_result.parent_transform_world;
         model = matrix4_multiply(model, matrix4_translation(absolute_origin));
         model = matrix4_multiply(model, matrix4_translation(absolute_anchor));
-        layer->rendered_state.transform_world = model;
+        layer->render_result.transform_world = model;
     }
 
     // perform a render pass on the given layers attachments
@@ -105,15 +113,15 @@ void layer_render(struct layer_t *layer)
         attachment_render(attachment, layer->properties.size);
     }
 
-    // perform a render pass on the given layers children, passing any rendered state from their parent
+    // perform a render pass on the given layers children, passing any new render results from their parent
     for (int i = 0; i < layer->num_children; i++)
     {
         struct layer_t *child = &layer->children[i];
 
         if (dirt & LAYER_TRANSFORM)
         {
-            child->rendered_state.parent_size = layer->properties.size;
-            child->rendered_state.parent_transform_world = layer->rendered_state.transform_world;
+            child->render_result.parent_size = layer->properties.size;
+            child->render_result.parent_transform_world = layer->render_result.transform_world;
         }
 
         layer_render(child);
