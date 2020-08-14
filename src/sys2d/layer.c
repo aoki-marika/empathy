@@ -160,15 +160,15 @@ void layer_render(struct layer_t *layer)
     // perform a render pass on the given layers children, passing any new render results from their parent
     for (int i = 0; i < layer->num_children; i++)
     {
-        struct layer_t *child = &layer->children[i];
+        struct layer_t *child_layer = &layer->children[i];
 
-        if (dirt & LAYER_TRANSFORM)
+        if (dirt & LAYER_TRANSFORM || child_layer->dirt & LAYER_TRANSFORM)
         {
-            child->render_result.parent_size = layer->properties.size;
-            child->render_result.parent_transform_world = layer->render_result.transform_world;
+            child_layer->render_result.parent_size = layer->properties.size;
+            child_layer->render_result.parent_transform_world = layer->render_result.transform_world;
         }
 
-        layer_render(child);
+        layer_render(child_layer);
     }
 
     // reset the given layers dirt, as it has now been applied
