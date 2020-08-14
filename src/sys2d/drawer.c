@@ -176,13 +176,14 @@ void layer_draw(const struct layer_t *layer,
                 struct drawer_t *drawer)
 {
     // get the attachment to draw
+    // TODO: proper attachment selection
     const struct attachment_t *attachment = NULL;
     if (layer->num_attachments > 0)
         attachment = &layer->attachments[0];
 
     // get the mesh to draw
     const struct mesh_t *mesh = NULL;
-    if (attachment->render_result.mesh != NULL)
+    if (attachment != NULL && attachment->render_result.mesh != NULL)
         mesh = attachment->render_result.mesh;
 
     // draw the attachment, if there is one and it has a rendered mesh

@@ -157,11 +157,12 @@ void layer_render(struct layer_t *layer)
         attachment_render(attachment, layer->properties.size);
     }
 
-    // perform a render pass on the given layers children, passing any new render results from their parent
+    // perform a render pass on the given layers children
     for (int i = 0; i < layer->num_children; i++)
     {
         struct layer_t *child_layer = &layer->children[i];
 
+        // pass any new render results from the parent
         if (dirt & LAYER_TRANSFORM || child_layer->dirt & LAYER_TRANSFORM)
         {
             child_layer->render_result.parent_size = layer->properties.size;
