@@ -26,9 +26,12 @@ void layer_add_dirt(struct layer_t *layer,
 
 /// Initialize the given layer as a root layer with the given properties.
 /// @param layer The layer to initialize.
+/// @param parent_layer The parent layer of the new layer.
+/// This can be `NULL` for root layers.
 /// @param id The unique identifier of the new layer, within its parent's children.
 /// See `layer_properties_t` for property documentation.
 void layer_init_dirty(struct layer_t *layer,
+                      const struct layer_t *parent_layer,
                       layer_id_t id,
                       struct vector2_t anchor,
                       struct vector2_t origin,
@@ -38,6 +41,25 @@ void layer_init_dirty(struct layer_t *layer,
     // layer
     layer->id = id;
     layer->dirt = LAYER_TRANSFORM;
+
+    // path
+    // set defaults
+    layer->path.num_ids = 0;
+    memset(layer->path.ids, 0x0, sizeof(layer->path.ids));
+
+    // populate the path if a parent was given
+    // if no parent was given then this is a root layer and it has no path
+    if (parent_layer != NULL)
+    {
+        // copy the given parents path to use as a base
+        memcpy(layer->path.ids,
+               parent_layer->path.ids,
+               parent_layer->path.num_ids * sizeof(layer_id_t));
+
+        // append the id of the new layer to the end of the path
+        layer->path.num_ids = parent_layer->path.num_ids + 1;
+        layer->path.ids[layer->path.num_ids - 1] = layer->id;
+    }
 
     // properties
     layer->properties.anchor = anchor;
@@ -65,6 +87,7 @@ void layer_init(struct layer_t *layer,
 {
     // initialize the given layer
     layer_init_dirty(layer,
+                     NULL,
                      0,
                      vector2_zero(),
                      vector2_zero(),
@@ -82,6 +105,27 @@ void layer_deinit(struct layer_t *layer)
     for (int i = 0; i < layer->num_attachments; i++)
         attachment_deinit(&layer->attachments[i]);
     free(layer->attachments);
+}
+
+bool layer_path_equals(const struct layer_t *layer,
+                       const struct layer_path_t *rhs)
+{
+    // get the path to compare to the given path
+    const struct layer_path_t *lhs = &layer->path;
+
+    // if the id counts mismatch then the two paths are different
+    // this is an easy check to avoid any uneccessary iterating of the ids
+    if (lhs->num_ids != rhs->num_ids)
+        return false;
+
+    // compare each component of the paths
+    // if any component mismatches then the paths are different
+    for (int i = 0; i < lhs->num_ids; i++)
+        if (lhs->ids[i] != rhs->ids[i])
+            return false;
+
+    // if this point has been reached then the two paths match
+    return true;
 }
 
 void layer_render(struct layer_t *layer)
@@ -163,12 +207,12 @@ void layer_set_size(struct layer_t *layer,
 /// @param child_id The unique identifier of the child layer to get the index of.
 /// @return The index of the first child layer matching the given unique identifier within the given layer's children.
 /// If no match was found then `-1` is returned instead.
-int layer_get_child_index(struct layer_t *layer,
+int layer_get_child_index(const struct layer_t *layer,
                           layer_id_t child_id)
 {
     for (int i = 0; i < layer->num_children; i++)
     {
-        struct layer_t *child_layer = &layer->children[i];
+        const struct layer_t *child_layer = &layer->children[i];
         if (child_layer->id == child_id)
             return i;
     }
@@ -179,6 +223,7 @@ int layer_get_child_index(struct layer_t *layer,
 
 void layer_add_child(struct layer_t *layer,
                      layer_id_t *child_id,
+                     struct layer_path_t *child_path,
                      struct vector2_t anchor,
                      struct vector2_t origin,
                      struct vector2_t size)
@@ -192,14 +237,18 @@ void layer_add_child(struct layer_t *layer,
 
     // initialize the new child layer
     layer_init_dirty(child_layer,
+                     layer,
                      layer->next_child_id++,
                      anchor,
                      origin,
                      size);
 
-    // set the given child id pointers value, if there is one
+    // set the given pointer values
     if (child_id != NULL)
         *child_id = child_layer->id;
+
+    if (child_path != NULL)
+        *child_path = child_layer->path;
 }
 
 void layer_remove_child(struct layer_t *layer,
@@ -228,14 +277,32 @@ void layer_remove_child(struct layer_t *layer,
                               layer->num_children * sizeof(struct layer_t));
 }
 
-struct layer_t *layer_get_child(struct layer_t *layer,
-                                layer_id_t child_id)
+struct layer_t *layer_get_child_id(struct layer_t *layer,
+                                   layer_id_t child_id)
 {
     int child_index = layer_get_child_index(layer, child_id);
     if (child_index >= 0)
         return &layer->children[child_index];
     else
         return NULL;
+}
+
+struct layer_t *layer_get_child_path(struct layer_t *root_layer,
+                                     const struct layer_path_t *path)
+{
+    // follow the given path, returning early if any component is not found
+    struct layer_t *layer = root_layer;
+    for (int i = 0; i < path->num_ids; i++)
+    {
+        layer_id_t child_id = path->ids[i];
+        struct layer_t *child_layer = layer_get_child_id(layer, child_id);
+        if (child_layer == NULL)
+            return NULL;
+
+        layer = child_layer;
+    }
+
+    return layer;
 }
 
 // MARK: Attachment
