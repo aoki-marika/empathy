@@ -68,6 +68,11 @@ struct matrix4_t matrix4_translation(struct vector3_t offset);
 /// @return A 4x4 scaling matrix of the given scale.
 struct matrix4_t matrix4_scaling(struct vector3_t scale);
 
+/// Create and return a new shearing matrix with the given 3D shear.
+/// @param shear The normalized shear of the shearing in 3D space.
+/// @return A 4x4 shearing matrix of the given shear.
+struct matrix4_t matrix4_shearing(struct vector3_t shear);
+
 /// Create and return a new rotation matrix with the given 3D angles.
 /// @param rotation The angles of the rotation in 3D space, in radians.
 /// @return A 4x4 rotation matrix of the given angles.

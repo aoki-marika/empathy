@@ -116,6 +116,17 @@ struct matrix4_t matrix4_scaling(struct vector3_t scale)
     );
 }
 
+struct matrix4_t matrix4_shearing(struct vector3_t shear)
+{
+    float x = shear.x, y = shear.y, z = shear.z;
+    return matrix4(
+        1, x, x, 0,
+        y, 1, y, 0,
+        z, z, 1, 0,
+        0, 0, 0, 1
+    );
+}
+
 struct matrix4_t matrix4_rotation(struct vector3_t angles)
 {
     // construct a rotation matrix for each axis, then multiply them to get the result
