@@ -63,8 +63,17 @@ struct layer_t
         /// The normalized point, within this layer, that this layer centres itself on.
         struct vector2_t origin;
 
+        /// The position of this layer's origin, relative to its anchor, in pixels.
+        struct vector2_t position;
+
         /// The size of this layer, in pixels.
         struct vector2_t size;
+
+        /// The normalized scale of this layer's size, around its origin.
+        struct vector2_t scale;
+
+        /// The clockwise rotation of this layer, around its origin, in degrees.
+        float rotation;
     } properties;
 
     /// All the properties of this layer affected by changes which have occurred within this layer since the last render pass.
@@ -153,8 +162,17 @@ void layer_set_anchor(struct layer_t *layer,
 void layer_set_origin(struct layer_t *layer,
                       struct vector2_t value);
 
+void layer_set_position(struct layer_t *layer,
+                        struct vector2_t value);
+
 void layer_set_size(struct layer_t *layer,
                     struct vector2_t value);
+
+void layer_set_scale(struct layer_t *layer,
+                     struct vector2_t value);
+
+void layer_set_rotation(struct layer_t *layer,
+                        float value);
 
 // MARK: Children
 
@@ -170,7 +188,10 @@ void layer_add_child(struct layer_t *layer,
                      struct layer_path_t *child_path,
                      struct vector2_t anchor,
                      struct vector2_t origin,
-                     struct vector2_t size);
+                     struct vector2_t position,
+                     struct vector2_t size,
+                     struct vector2_t scale,
+                     float rotation);
 
 /// Remove the first child layer matching the given unique identifier within the given layer's children, deinitializing it.
 ///

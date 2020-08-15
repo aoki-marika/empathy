@@ -35,7 +35,10 @@ void layer_init_dirty(struct layer_t *layer,
                       layer_id_t id,
                       struct vector2_t anchor,
                       struct vector2_t origin,
-                      struct vector2_t size)
+                      struct vector2_t position,
+                      struct vector2_t size,
+                      struct vector2_t scale,
+                      float rotation)
 {
     // initialize the given layer
     // layer
@@ -64,7 +67,10 @@ void layer_init_dirty(struct layer_t *layer,
     // properties
     layer->properties.anchor = anchor;
     layer->properties.origin = origin;
+    layer->properties.position = position;
     layer->properties.size = size;
+    layer->properties.scale = scale;
+    layer->properties.rotation = rotation;
 
     // render result
     layer->render_result.parent_size = vector2_zero();
@@ -91,7 +97,10 @@ void layer_init(struct layer_t *layer,
                      0,
                      vector2_zero(),
                      vector2_zero(),
-                     size);
+                     vector2_zero(),
+                     size,
+                     vector2(1, 1),
+                     0);
 }
 
 void layer_deinit(struct layer_t *layer)
@@ -190,6 +199,13 @@ void layer_set_origin(struct layer_t *layer,
     layer_add_dirt(layer, LAYER_TRANSFORM, true);
 }
 
+void layer_set_position(struct layer_t *layer,
+                        struct vector2_t value)
+{
+    layer->properties.position = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
 void layer_set_size(struct layer_t *layer,
                     struct vector2_t value)
 {
@@ -199,6 +215,20 @@ void layer_set_size(struct layer_t *layer,
     // attachments need to re-render their mesh for size changes
     for (int i = 0; i < layer->num_attachments; i++)
         layer->attachments[i].dirt |= ATTACHMENT_MESH;
+}
+
+void layer_set_scale(struct layer_t *layer,
+                     struct vector2_t value)
+{
+    layer->properties.scale = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
+void layer_set_rotation(struct layer_t *layer,
+                        float value)
+{
+    layer->properties.rotation = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
 }
 
 // MARK: Children
@@ -227,7 +257,10 @@ void layer_add_child(struct layer_t *layer,
                      struct layer_path_t *child_path,
                      struct vector2_t anchor,
                      struct vector2_t origin,
-                     struct vector2_t size)
+                     struct vector2_t position,
+                     struct vector2_t size,
+                     struct vector2_t scale,
+                     float rotation)
 {
     // insert the new child layer
     unsigned int child_index = layer->num_children++;
@@ -242,7 +275,10 @@ void layer_add_child(struct layer_t *layer,
                      layer->next_child_id++,
                      anchor,
                      origin,
-                     size);
+                     position,
+                     size,
+                     scale,
+                     rotation);
 
     // set the given pointer values
     if (child_id != NULL)
