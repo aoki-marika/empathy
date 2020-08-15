@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 
 // MARK: - Functions
@@ -153,9 +154,24 @@ void layer_render(struct layer_t *layer)
                                                    -layer->properties.size.y * layer->properties.origin.y,
                                                    0);
 
+        struct vector3_t position = vector3(layer->properties.position.x,
+                                            layer->properties.position.y,
+                                            0);
+
+        struct vector3_t scale = vector3(layer->properties.scale.x,
+                                         layer->properties.scale.y,
+                                         0);
+
+        struct vector3_t rotation_radians = vector3(0,
+                                                    0,
+                                                    layer->properties.rotation * M_PI / 180);
+
         struct matrix4_t model = layer->render_result.parent_transform_world;
-        model = matrix4_multiply(model, matrix4_translation(absolute_origin));
         model = matrix4_multiply(model, matrix4_translation(absolute_anchor));
+        model = matrix4_multiply(model, matrix4_rotation(rotation_radians));
+        model = matrix4_multiply(model, matrix4_translation(position));
+        model = matrix4_multiply(model, matrix4_scaling(scale));
+        model = matrix4_multiply(model, matrix4_translation(absolute_origin));
         layer->render_result.transform_world = model;
     }
 
