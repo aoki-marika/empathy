@@ -1,5 +1,7 @@
 #include "matrix.h"
 
+#include <math.h>
+
 // MARK: - Functions
 
 struct matrix4_t matrix4(float e00, float e10, float e20, float e30,
@@ -77,9 +79,13 @@ struct matrix4_t matrix4_multiply(const struct matrix4_t left,
     return result;
 }
 
-struct matrix4_t matrix4_orthographic(float l, float r, float t, float b, float n, float f)
+struct matrix4_t matrix4_orthographic(float l,
+                                      float r,
+                                      float t,
+                                      float b,
+                                      float n,
+                                      float f)
 {
-    // parameter names are shortened as to not be visually cluttered
     return matrix4(
         2 / (r - l), 0,           0,           -(r + l) / (r - l),
         0,           2 / (t - b), 0,           -(t + b) / (t - b),
@@ -90,10 +96,63 @@ struct matrix4_t matrix4_orthographic(float l, float r, float t, float b, float 
 
 struct matrix4_t matrix4_translation(struct vector3_t offset)
 {
+    float x = offset.x, y = offset.y, z = offset.z;
     return matrix4(
-        1, 0, 0, offset.x,
-        0, 1, 0, offset.y,
-        0, 0, 1, offset.z,
+        1, 0, 0, x,
+        0, 1, 0, y,
+        0, 0, 1, z,
         0, 0, 0, 1
     );
+}
+
+struct matrix4_t matrix4_scaling(struct vector3_t scale)
+{
+    float x = scale.x, y = scale.y, z = scale.z;
+    return matrix4(
+        x, 0, 0, 0,
+        0, y, 0, 0,
+        0, 0, z, 0,
+        0, 0, 0, 1
+    );
+}
+
+struct matrix4_t matrix4_rotation(struct vector3_t angles)
+{
+    // construct a rotation matrix for each axis, then multiply them to get the result
+    // x
+    float x_sin = sinf(angles.x);
+    float x_cos = cosf(angles.x);
+    struct matrix4_t x = matrix4(
+             1,      0,      0,      0,
+             0,  x_cos, -x_sin,      0,
+             0,  x_sin,  x_cos,      0,
+             0,      0,      0,      1
+    );
+
+    // y
+    float y_sin = sinf(angles.y);
+    float y_cos = cosf(angles.y);
+    struct matrix4_t y = matrix4(
+         y_cos,      0,  y_sin,      0,
+             0,      1,      0,      0,
+        -y_sin,      0,  y_cos,      0,
+             0,      0,      0,      1
+    );
+
+    // z
+    float z_sin = sinf(angles.z);
+    float z_cos = cosf(angles.z);
+    struct matrix4_t z = matrix4(
+         z_cos, -z_sin,      0,      0,
+         z_sin,  z_cos,      0,      0,
+             0,      0,      1,      0,
+             0,      0,      0,      1
+    );
+
+    // calculate and return the result
+    struct matrix4_t matrix = matrix4_identity();
+    matrix = matrix4_multiply(matrix, x);
+    matrix = matrix4_multiply(matrix, y);
+    matrix = matrix4_multiply(matrix, z);
+    return matrix;
 }

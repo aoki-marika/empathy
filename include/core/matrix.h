@@ -62,3 +62,13 @@ struct matrix4_t matrix4_orthographic(float left,
 /// @param offset The offset of the translation in 3D space.
 /// @return A 4x4 translation matrix of the given offset.
 struct matrix4_t matrix4_translation(struct vector3_t offset);
+
+/// Create and return a new scaling matrix with the given 3D scale.
+/// @param scale The normalized scale of the scaling in 3D space.
+/// @return A 4x4 scaling matrix of the given scale.
+struct matrix4_t matrix4_scaling(struct vector3_t scale);
+
+/// Create and return a new rotation matrix with the given 3D angles.
+/// @param rotation The angles of the rotation in 3D space, in radians.
+/// @return A 4x4 rotation matrix of the given angles.
+struct matrix4_t matrix4_rotation(struct vector3_t angles);
