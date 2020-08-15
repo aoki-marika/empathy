@@ -69,8 +69,11 @@ struct layer_t
         /// The size of this layer, in pixels.
         struct vector2_t size;
 
-        /// The normalized scale of this layer's size, around its origin.
+        /// The normalized scale of this layer, around its origin.
         struct vector2_t scale;
+
+        /// The size-relative normalized shear of this layer.
+        struct vector2_t shear;
 
         /// The clockwise rotation of this layer, around its origin, in degrees.
         float rotation;
@@ -171,6 +174,9 @@ void layer_set_size(struct layer_t *layer,
 void layer_set_scale(struct layer_t *layer,
                      struct vector2_t value);
 
+void layer_set_shear(struct layer_t *layer,
+                     struct vector2_t value);
+
 void layer_set_rotation(struct layer_t *layer,
                         float value);
 
@@ -190,6 +196,7 @@ void layer_add_child(struct layer_t *layer,
                      struct vector2_t origin,
                      struct vector2_t position,
                      struct vector2_t size,
+                     struct vector2_t shear,
                      struct vector2_t scale,
                      float rotation);
 

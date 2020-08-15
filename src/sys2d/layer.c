@@ -39,6 +39,7 @@ void layer_init_dirty(struct layer_t *layer,
                       struct vector2_t position,
                       struct vector2_t size,
                       struct vector2_t scale,
+                      struct vector2_t shear,
                       float rotation)
 {
     // initialize the given layer
@@ -71,6 +72,7 @@ void layer_init_dirty(struct layer_t *layer,
     layer->properties.position = position;
     layer->properties.size = size;
     layer->properties.scale = scale;
+    layer->properties.shear = shear;
     layer->properties.rotation = rotation;
 
     // render result
@@ -101,6 +103,7 @@ void layer_init(struct layer_t *layer,
                      vector2_zero(),
                      size,
                      vector2(1, 1),
+                     vector2_zero(),
                      0);
 }
 
@@ -162,6 +165,10 @@ void layer_render(struct layer_t *layer)
                                          layer->properties.scale.y,
                                          0);
 
+        struct vector3_t shear = vector3(layer->properties.shear.x,
+                                         layer->properties.shear.y,
+                                         0);
+
         struct vector3_t rotation_radians = vector3(0,
                                                     0,
                                                     layer->properties.rotation * M_PI / 180);
@@ -172,6 +179,7 @@ void layer_render(struct layer_t *layer)
         model = matrix4_multiply(model, matrix4_translation(position));
         model = matrix4_multiply(model, matrix4_scaling(scale));
         model = matrix4_multiply(model, matrix4_translation(absolute_origin));
+        model = matrix4_multiply(model, matrix4_shearing(shear));
         layer->render_result.transform_world = model;
     }
 
@@ -240,6 +248,13 @@ void layer_set_scale(struct layer_t *layer,
     layer_add_dirt(layer, LAYER_TRANSFORM, true);
 }
 
+void layer_set_shear(struct layer_t *layer,
+                     struct vector2_t value)
+{
+    layer->properties.shear = value;
+    layer_add_dirt(layer, LAYER_TRANSFORM, true);
+}
+
 void layer_set_rotation(struct layer_t *layer,
                         float value)
 {
@@ -276,6 +291,7 @@ void layer_add_child(struct layer_t *layer,
                      struct vector2_t position,
                      struct vector2_t size,
                      struct vector2_t scale,
+                     struct vector2_t shear,
                      float rotation)
 {
     // insert the new child layer
@@ -294,6 +310,7 @@ void layer_add_child(struct layer_t *layer,
                      position,
                      size,
                      scale,
+                     shear,
                      rotation);
 
     // set the given pointer values
