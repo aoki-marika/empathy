@@ -81,7 +81,6 @@ void layer_init_dirty(struct layer_t *layer,
     layer->render_result.transform_world = matrix4_identity();
 
     // attachments
-    layer->next_attachment_id = 0;
     layer->num_attachments = 0;
     layer->attachments = malloc(0);
 
@@ -393,14 +392,11 @@ struct layer_t *layer_get_child_path(struct layer_t *root_layer,
 /// @return The index of the first attachment matching the given unique identifier within the given layer's attachments.
 /// If no match was found then `-1` is returned instead.
 int layer_get_attachment_index(struct layer_t *layer,
-                               attachment_id_t id)
+                               const struct attachment_t *attachment)
 {
     for (int i = 0; i < layer->num_attachments; i++)
-    {
-        const struct attachment_t *attachment = layer->attachments[i];
-        if (attachment->id == id)
+        if (layer->attachments[i] == attachment)
             return i;
-    }
 
     // if this point has been reached then no match was found
     return -1;
@@ -430,7 +426,6 @@ void layer_add_attachment_colour(struct layer_t *layer,
     // initialize the new colour attachment
     struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
     attachment_init_colour(attachment,
-                           layer->next_attachment_id++,
                            top_left,
                            top_right,
                            bottom_left,
@@ -449,7 +444,6 @@ void layer_add_attachment_texture(struct layer_t *layer,
     // initialize the new texture attachment
     struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
     attachment_init_texture(attachment,
-                            layer->next_attachment_id++,
                             source,
                             source_index,
                             bottom_left,
@@ -460,21 +454,21 @@ void layer_add_attachment_texture(struct layer_t *layer,
 }
 
 void layer_remove_attachment(struct layer_t *layer,
-                             attachment_id_t id)
+                             const struct attachment_t *attachment)
 {
     // attempt to get the index of the attachment to remove
-    int index = layer_get_attachment_index(layer, id);
+    int index = layer_get_attachment_index(layer, attachment);
     if (index < 0)
     {
         // the attachment could not be found, print the details and terminate
-        fprintf(stderr, "LAYER ERROR: could not locate attachment %u within layer %p\n", id, layer);
+        fprintf(stderr, "LAYER ERROR: could not locate attachment %p within layer %p\n", attachment, layer);
         exit(EXIT_FAILURE);
     }
 
     // deinitialize the attachment before removing it
-    struct attachment_t *attachment = layer->attachments[index];
-    attachment_deinit(attachment);
-    free(attachment);
+    struct attachment_t *layer_attachment = layer->attachments[index];
+    attachment_deinit(layer_attachment);
+    free(layer_attachment);
 
     // shuffle and reallocate the layers attachments array to remove the attachments element
     memmove(&layer->attachments[index],
@@ -484,14 +478,4 @@ void layer_remove_attachment(struct layer_t *layer,
     layer->num_attachments--;
     layer->attachments = realloc(layer->attachments,
                                  layer->num_attachments * sizeof(struct attachment_t));
-}
-
-struct attachment_t *layer_get_attachment(struct layer_t *layer,
-                                          attachment_id_t id)
-{
-    int index = layer_get_attachment_index(layer, id);
-    if (index >= 0)
-        return layer->attachments[index];
-    else
-        return NULL;
 }

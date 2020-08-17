@@ -102,9 +102,6 @@ struct layer_t
         struct matrix4_t transform_world;
     } render_result;
 
-    /// The unique identifier for the next attachment added to this layer.
-    attachment_id_t next_attachment_id;
-
     /// The total number of attachments attached to this layer.
     unsigned int num_attachments;
 
@@ -250,19 +247,11 @@ void layer_add_attachment_texture(struct layer_t *layer,
                                   struct uv_t bottom_left,
                                   struct uv_t top_right);
 
-/// Remove the first attachment matching the given unique identifier within the given layer's attachments, deinitializing it.
+/// Remove the given attachment from the given layer's attachments.
 ///
-/// If no attachment matching the given unique identifier is found within the given layer's attachment then the program terminates.
-/// @param layer The layer containing the attachment to remove.
-/// @param id The unique identifier of the attachment to remove.
+/// If the given attachment is not within the given layer's attachments then the program terminates.
+/// After this function the given attachment is no longer available.
+/// @param layer The layer containing the given attachment.
+/// @param attachment The attachment to remove.
 void layer_remove_attachment(struct layer_t *layer,
-                             attachment_id_t id);
-
-/// Get the first attachment matching the given unique identifier within the given layer's attachments, if any.
-/// @param layer The layer containing the attachment to get.
-/// @param id The unique identifier of the attachment to get.
-/// @return A pointer to the first attachment matching the given unique identifier within the given layer's attachments.
-/// This pointer is only available until the given layer's attachments are modified.
-/// If no matches were found then `NULL` is returned instead.
-struct attachment_t *layer_get_attachment(struct layer_t *layer,
-                                          attachment_id_t id);
+                             const struct attachment_t *attachment);

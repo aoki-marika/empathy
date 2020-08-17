@@ -130,15 +130,12 @@ void attachment_texture_render_mesh(struct attachment_texture_properties_t *prop
               indices);
 }
 
-/// Initialize the given attachment with the given unique identifier and default property values.
+/// Initialize the given attachment with default property values.
 /// @param attachment The attachment to initialize.
-/// @param id The unique identifier of the new attachment within the containing layer's children.
-void attachment_init(struct attachment_t *attachment,
-                     attachment_id_t id)
+void attachment_init_dirty(struct attachment_t *attachment)
 {
     // initialize the given attachment
     // attachment
-    attachment->id = id;
     attachment->dirt = ATTACHMENT_MESH;
 
     // colour properties
@@ -158,14 +155,13 @@ void attachment_init(struct attachment_t *attachment,
 }
 
 void attachment_init_colour(struct attachment_t *attachment,
-                            attachment_id_t id,
                             struct colour4_t top_left,
                             struct colour4_t top_right,
                             struct colour4_t bottom_left,
                             struct colour4_t bottom_right)
 {
     // initialize the given attachment
-    attachment_init(attachment, id);
+    attachment_init_dirty(attachment);
     attachment->type = ATTACHMENT_COLOUR;
     attachment->colour_properties.top_left = top_left;
     attachment->colour_properties.top_right = top_right;
@@ -174,14 +170,13 @@ void attachment_init_colour(struct attachment_t *attachment,
 }
 
 void attachment_init_texture(struct attachment_t *attachment,
-                             attachment_id_t id,
                              struct texture_t *source,
                              unsigned int source_index,
                              struct uv_t bottom_left,
                              struct uv_t top_right)
 {
     // initialize the given attachment
-    attachment_init(attachment, id);
+    attachment_init_dirty(attachment);
     attachment->type = ATTACHMENT_TEXTURE;
     attachment->texture_properties.source = source;
     attachment->texture_properties.source_index = source_index;

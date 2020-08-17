@@ -179,7 +179,7 @@ void layer_draw(const struct layer_t *layer,
     // TODO: proper attachment selection
     const struct attachment_t *attachment = NULL;
     if (layer->num_attachments > 0)
-        attachment = &layer->attachments[0];
+        attachment = layer->attachments[0];
 
     // get the mesh to draw
     const struct mesh_t *mesh = NULL;
@@ -237,5 +237,5 @@ void layer_draw(const struct layer_t *layer,
 
     // draw the given layers children
     for (int i = 0; i < layer->num_children; i++)
-        layer_draw(&layer->children[i], drawer);
+        layer_draw(layer->children[i], drawer);
 }

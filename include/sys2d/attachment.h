@@ -17,11 +17,6 @@
 /// See `layer.h` for further documentation on this.
 ///
 
-// MARK: - Type Definitions
-
-/// A unique identifier for an attachment, within its containing layer.
-typedef unsigned int attachment_id_t;
-
 // MARK: - Macros
 
 /// The index of the vertex attribute that the rendered meshes of attachments bind their XYZ positions to.
@@ -49,9 +44,6 @@ typedef unsigned int attachment_id_t;
 /// A single attachment.
 struct attachment_t
 {
-    /// The unique identifier of this attachment within its containing layer.
-    attachment_id_t id;
-
     /// The type of this attachment.
     enum attachment_type_t
     {
@@ -127,10 +119,8 @@ struct attachment_t
 
 /// Initialize the given attachment as a colour attachment with the given properties.
 /// @param attachment The attachment to initialize.
-/// @param id The unique identifier of the new attachment within its containing layer.
 /// See `attachment_colour_properties_t` for property documentation.
 void attachment_init_colour(struct attachment_t *attachment,
-                            attachment_id_t id,
                             struct colour4_t top_left,
                             struct colour4_t top_right,
                             struct colour4_t bottom_left,
@@ -138,10 +128,8 @@ void attachment_init_colour(struct attachment_t *attachment,
 
 /// Initialize the given attachment as a texture attachment with the given properties.
 /// @param attachment The attachment to initialize.
-/// @param id The unique identifier of the new attachment within its containing layer.
 /// See `attachment_texture_properties_t` for property documentation.
 void attachment_init_texture(struct attachment_t *attachment,
-                             attachment_id_t id,
                              struct texture_t *source,
                              unsigned int source_index,
                              struct uv_t bottom_left,
