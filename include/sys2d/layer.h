@@ -110,8 +110,8 @@ struct layer_t
 
     /// All the attachments attached to this layer.
     ///
-    /// Allocated.
-    struct attachment_t *attachments;
+    /// The array and each item are allocated.
+    struct attachment_t **attachments;
 
     /// The unique identifier for the next child layer added to this layer.
     layer_id_t next_child_id;
@@ -122,8 +122,8 @@ struct layer_t
     /// All the child layers within this layer.
     ///
     /// Children are ordererd back-to-front, on top of the parent.
-    /// Allocated.
-    struct layer_t *children;
+    /// The array and each item are allocated.
+    struct layer_t **children;
 };
 
 // MARK: - Functions

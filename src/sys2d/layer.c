@@ -22,7 +22,7 @@ void layer_add_dirt(struct layer_t *layer,
     layer->dirt |= dirt;
     if (include_children)
         for (int i = 0; i < layer->num_children; i++)
-            layer_add_dirt(&layer->children[i], dirt, true);
+            layer_add_dirt(layer->children[i], dirt, true);
 }
 
 /// Initialize the given layer as a root layer with the given properties.
@@ -111,12 +111,20 @@ void layer_deinit(struct layer_t *layer)
 {
     // children
     for (int i = 0; i < layer->num_children; i++)
-        layer_deinit(&layer->children[i]);
+    {
+        struct layer_t *child_layer = layer->children[i];
+        layer_deinit(child_layer);
+        free(child_layer);
+    }
     free(layer->children);
 
     // attachments
     for (int i = 0; i < layer->num_attachments; i++)
-        attachment_deinit(&layer->attachments[i]);
+    {
+        struct attachment_t *attachment = layer->attachments[i];
+        attachment_deinit(attachment);
+        free(attachment);
+    }
     free(layer->attachments);
 }
 
@@ -186,14 +194,14 @@ void layer_render(struct layer_t *layer)
     // perform a render pass on the given layers attachments
     for (int i = 0; i < layer->num_attachments; i++)
     {
-        struct attachment_t *attachment = &layer->attachments[i];
+        struct attachment_t *attachment = layer->attachments[i];
         attachment_render(attachment, layer->properties.size);
     }
 
     // perform a render pass on the given layers children
     for (int i = 0; i < layer->num_children; i++)
     {
-        struct layer_t *child_layer = &layer->children[i];
+        struct layer_t *child_layer = layer->children[i];
 
         // pass any new render results from the parent
         if (dirt & LAYER_TRANSFORM || child_layer->dirt & LAYER_TRANSFORM)
@@ -238,7 +246,7 @@ void layer_set_size(struct layer_t *layer,
 
     // attachments need to re-render their mesh for size changes
     for (int i = 0; i < layer->num_attachments; i++)
-        layer->attachments[i].dirt |= ATTACHMENT_MESH;
+        layer->attachments[i]->dirt |= ATTACHMENT_MESH;
 }
 
 void layer_set_scale(struct layer_t *layer,
@@ -274,7 +282,7 @@ int layer_get_child_index(const struct layer_t *layer,
 {
     for (int i = 0; i < layer->num_children; i++)
     {
-        const struct layer_t *child_layer = &layer->children[i];
+        const struct layer_t *child_layer = layer->children[i];
         if (child_layer->id == child_id)
             return i;
     }
@@ -294,14 +302,8 @@ void layer_add_child(struct layer_t *layer,
                      struct vector2_t shear,
                      float rotation)
 {
-    // insert the new child layer
-    unsigned int child_index = layer->num_children++;
-    layer->children = realloc(layer->children,
-                              layer->num_children * sizeof(struct layer_t));
-
-    struct layer_t *child_layer = &layer->children[child_index];
-
     // initialize the new child layer
+    struct layer_t *child_layer = malloc(sizeof(struct layer_t));
     layer_init_dirty(child_layer,
                      layer,
                      layer->next_child_id++,
@@ -312,6 +314,13 @@ void layer_add_child(struct layer_t *layer,
                      scale,
                      shear,
                      rotation);
+
+    // insert the new child layer
+    unsigned int child_index = layer->num_children++;
+    layer->children = realloc(layer->children,
+                              layer->num_children * sizeof(struct layer_t));
+
+    layer->children[child_index] = child_layer;
 
     // set the given pointer values
     if (child_id != NULL)
@@ -334,8 +343,9 @@ void layer_remove_child(struct layer_t *layer,
     }
 
     // deinitialize the child layer before removing it
-    struct layer_t *child_layer = &layer->children[child_index];
+    struct layer_t *child_layer = layer->children[child_index];
     layer_deinit(child_layer);
+    free(child_layer);
 
     // shuffle and reallocate the layers children array to remove the child layers element
     memmove(&layer->children[child_index],
@@ -352,7 +362,7 @@ struct layer_t *layer_get_child_id(struct layer_t *layer,
 {
     int child_index = layer_get_child_index(layer, child_id);
     if (child_index >= 0)
-        return &layer->children[child_index];
+        return layer->children[child_index];
     else
         return NULL;
 }
@@ -387,7 +397,7 @@ int layer_get_attachment_index(struct layer_t *layer,
 {
     for (int i = 0; i < layer->num_attachments; i++)
     {
-        struct attachment_t *attachment = &layer->attachments[i];
+        const struct attachment_t *attachment = layer->attachments[i];
         if (attachment->id == id)
             return i;
     }
@@ -399,8 +409,9 @@ int layer_get_attachment_index(struct layer_t *layer,
 /// Add the given initialized attachment to the given layer's attachments.
 /// @param layer The layer to add the given attachment to.
 /// @param attachment The initialized attachment to add.
+/// It is expected that this attachment is allocated, and it will be freed once it is removed from the given layer.
 void layer_add_attachment(struct layer_t *layer,
-                          struct attachment_t attachment)
+                          struct attachment_t *attachment)
 {
     // insert the given attachment
     unsigned int index = layer->num_attachments++;
@@ -417,8 +428,8 @@ void layer_add_attachment_colour(struct layer_t *layer,
                                  struct colour4_t bottom_right)
 {
     // initialize the new colour attachment
-    struct attachment_t attachment;
-    attachment_init_colour(&attachment,
+    struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
+    attachment_init_colour(attachment,
                            layer->next_attachment_id++,
                            top_left,
                            top_right,
@@ -436,8 +447,8 @@ void layer_add_attachment_texture(struct layer_t *layer,
                                   struct uv_t top_right)
 {
     // initialize the new texture attachment
-    struct attachment_t attachment;
-    attachment_init_texture(&attachment,
+    struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
+    attachment_init_texture(attachment,
                             layer->next_attachment_id++,
                             source,
                             source_index,
@@ -461,8 +472,9 @@ void layer_remove_attachment(struct layer_t *layer,
     }
 
     // deinitialize the attachment before removing it
-    struct attachment_t *attachment = &layer->attachments[index];
+    struct attachment_t *attachment = layer->attachments[index];
     attachment_deinit(attachment);
+    free(attachment);
 
     // shuffle and reallocate the layers attachments array to remove the attachments element
     memmove(&layer->attachments[index],
@@ -479,7 +491,7 @@ struct attachment_t *layer_get_attachment(struct layer_t *layer,
 {
     int index = layer_get_attachment_index(layer, id);
     if (index >= 0)
-        return &layer->attachments[index];
+        return layer->attachments[index];
     else
         return NULL;
 }
