@@ -41,6 +41,7 @@ void layer_init_dirty(struct layer_t *layer,
 {
     // initialize the given layer
     // layer
+    layer->parent = parent_layer;
     layer->dirt = LAYER_TRANSFORM;
 
     // properties
@@ -53,8 +54,6 @@ void layer_init_dirty(struct layer_t *layer,
     layer->properties.rotation = rotation;
 
     // render result
-    layer->render_result.parent_size = vector2_zero();
-    layer->render_result.parent_transform_world = matrix4_identity();
     layer->render_result.transform_world = matrix4_identity();
 
     // attachments
@@ -62,7 +61,6 @@ void layer_init_dirty(struct layer_t *layer,
     layer->attachments = malloc(0);
 
     // children
-    layer->next_child_id = 0;
     layer->num_children = 0;
     layer->children = malloc(0);
 }
@@ -110,62 +108,71 @@ void layer_render(struct layer_t *layer)
     if (dirt & LAYER_TRANSFORM)
     {
         // the transform matrix needs to be recalculated
+        // get the parent and base properties
+        struct vector2_t parent_size = vector2_zero();
+        struct matrix4_t base_transform_world = matrix4_identity();
+        if (layer->parent != NULL)
+        {
+            parent_size = layer->parent->properties.size;
+            base_transform_world = layer->parent->render_result.transform_world;
+        }
+
         // calculate and set the new matrix
-        struct vector3_t absolute_anchor = vector3(layer->render_result.parent_size.x * layer->properties.anchor.x,
-                                                   layer->render_result.parent_size.y * layer->properties.anchor.y,
-                                                   0);
+        struct matrix4_t model = base_transform_world;
 
-        struct vector3_t absolute_origin = vector3(-layer->properties.size.x * layer->properties.origin.x,
-                                                   -layer->properties.size.y * layer->properties.origin.y,
-                                                   0);
+        // apply the transforms
+        // anchor
+        model = matrix4_multiply(model, matrix4_translation(vector3(
+            parent_size.x * layer->properties.anchor.x,
+            parent_size.y * layer->properties.anchor.y,
+            0
+        )));
 
-        struct vector3_t position = vector3(layer->properties.position.x,
-                                            layer->properties.position.y,
-                                            0);
+        // rotation
+        model = matrix4_multiply(model, matrix4_rotation(vector3(
+            0,
+            0,
+            layer->properties.rotation * M_PI / 180
+        )));
 
-        struct vector3_t scale = vector3(layer->properties.scale.x,
-                                         layer->properties.scale.y,
-                                         0);
+        // position
+        model = matrix4_multiply(model, matrix4_translation(vector3(
+            layer->properties.position.x,
+            layer->properties.position.y,
+            0
+        )));
 
-        struct vector3_t shear = vector3(layer->properties.shear.x,
-                                         layer->properties.shear.y,
-                                         0);
+        // scale
+        model = matrix4_multiply(model, matrix4_scaling(vector3(
+            layer->properties.scale.x,
+            layer->properties.scale.y,
+            0
+        )));
 
-        struct vector3_t rotation_radians = vector3(0,
-                                                    0,
-                                                    layer->properties.rotation * M_PI / 180);
+        // origin
+        model = matrix4_multiply(model, matrix4_translation(vector3(
+            -layer->properties.size.x * layer->properties.origin.x,
+            -layer->properties.size.y * layer->properties.origin.y,
+            0
+        )));
 
-        struct matrix4_t model = layer->render_result.parent_transform_world;
-        model = matrix4_multiply(model, matrix4_translation(absolute_anchor));
-        model = matrix4_multiply(model, matrix4_rotation(rotation_radians));
-        model = matrix4_multiply(model, matrix4_translation(position));
-        model = matrix4_multiply(model, matrix4_scaling(scale));
-        model = matrix4_multiply(model, matrix4_translation(absolute_origin));
-        model = matrix4_multiply(model, matrix4_shearing(shear));
+        // shear
+        model = matrix4_multiply(model, matrix4_shearing(vector3(
+            layer->properties.shear.x,
+            layer->properties.shear.y,
+            0
+        )));
+
         layer->render_result.transform_world = model;
     }
 
     // perform a render pass on the given layers attachments
     for (int i = 0; i < layer->num_attachments; i++)
-    {
-        struct attachment_t *attachment = layer->attachments[i];
-        attachment_render(attachment, layer->properties.size);
-    }
+        attachment_render(layer->attachments[i], layer->properties.size);
 
     // perform a render pass on the given layers children
     for (int i = 0; i < layer->num_children; i++)
-    {
-        struct layer_t *child_layer = layer->children[i];
-
-        // pass any new render results from the parent
-        if (dirt & LAYER_TRANSFORM || child_layer->dirt & LAYER_TRANSFORM)
-        {
-            child_layer->render_result.parent_size = layer->properties.size;
-            child_layer->render_result.parent_transform_world = layer->render_result.transform_world;
-        }
-
-        layer_render(child_layer);
-    }
+        layer_render(layer->children[i]);
 
     // reset the given layers dirt, as it has now been applied
     layer->dirt = LAYER_NONE;

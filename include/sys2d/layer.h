@@ -22,6 +22,9 @@
 /// A single layer.
 struct layer_t
 {
+    /// The layer containing this layer within its children, if any.
+    const struct layer_t *parent;
+
     /// The properties of this layer.
     struct layer_properties_t
     {
@@ -60,12 +63,6 @@ struct layer_t
     /// The result of the last render pass performed on this layer.
     struct layer_render_result_t
     {
-        /// The size of the layer's parent, in pixels.
-        struct vector2_t parent_size;
-
-        /// The world-space transform model matrix of the layer's parent.
-        struct matrix4_t parent_transform_world;
-
         /// The world-space transform model matrix of the layer.
         struct matrix4_t transform_world;
     } render_result;
@@ -77,7 +74,6 @@ struct layer_t
     ///
     /// The array and each item are allocated.
     struct attachment_t **attachments;
-
 
     /// The total number of child layers within this layer.
     unsigned int num_children;
