@@ -27,13 +27,10 @@ void layer_add_dirt(struct layer_t *layer,
 
 /// Initialize the given layer as a root layer with the given properties.
 /// @param layer The layer to initialize.
-/// @param parent_layer The parent layer of the new layer.
-/// This can be `NULL` for root layers.
-/// @param id The unique identifier of the new layer, within its parent's children.
+/// @param parent_layer The parent layer containing the new layer within its children, if any.
 /// See `layer_properties_t` for property documentation.
 void layer_init_dirty(struct layer_t *layer,
                       const struct layer_t *parent_layer,
-                      layer_id_t id,
                       struct vector2_t anchor,
                       struct vector2_t origin,
                       struct vector2_t position,
@@ -44,27 +41,7 @@ void layer_init_dirty(struct layer_t *layer,
 {
     // initialize the given layer
     // layer
-    layer->id = id;
     layer->dirt = LAYER_TRANSFORM;
-
-    // path
-    // set defaults
-    layer->path.num_ids = 0;
-    memset(layer->path.ids, 0x0, sizeof(layer->path.ids));
-
-    // populate the path if a parent was given
-    // if no parent was given then this is a root layer and it has no path
-    if (parent_layer != NULL)
-    {
-        // copy the given parents path to use as a base
-        memcpy(layer->path.ids,
-               parent_layer->path.ids,
-               parent_layer->path.num_ids * sizeof(layer_id_t));
-
-        // append the id of the new layer to the end of the path
-        layer->path.num_ids = parent_layer->path.num_ids + 1;
-        layer->path.ids[layer->path.num_ids - 1] = layer->id;
-    }
 
     // properties
     layer->properties.anchor = anchor;
@@ -96,7 +73,6 @@ void layer_init(struct layer_t *layer,
     // initialize the given layer
     layer_init_dirty(layer,
                      NULL,
-                     0,
                      vector2_zero(),
                      vector2_zero(),
                      vector2_zero(),
@@ -125,27 +101,6 @@ void layer_deinit(struct layer_t *layer)
         free(attachment);
     }
     free(layer->attachments);
-}
-
-bool layer_path_equals(const struct layer_t *layer,
-                       const struct layer_path_t *rhs)
-{
-    // get the path to compare to the given path
-    const struct layer_path_t *lhs = &layer->path;
-
-    // if the id counts mismatch then the two paths are different
-    // this is an easy check to avoid any uneccessary iterating of the ids
-    if (lhs->num_ids != rhs->num_ids)
-        return false;
-
-    // compare each component of the paths
-    // if any component mismatches then the paths are different
-    for (int i = 0; i < lhs->num_ids; i++)
-        if (lhs->ids[i] != rhs->ids[i])
-            return false;
-
-    // if this point has been reached then the two paths match
-    return true;
 }
 
 void layer_render(struct layer_t *layer)
@@ -271,41 +226,35 @@ void layer_set_rotation(struct layer_t *layer,
 
 // MARK: Children
 
-/// Get the index of the first child layer matching the given unique identifier within the given layer's children.
-/// @param layer The layer containing the child layer to get the index of.
-/// @param child_id The unique identifier of the child layer to get the index of.
-/// @return The index of the first child layer matching the given unique identifier within the given layer's children.
-/// If no match was found then `-1` is returned instead.
+/// Get the index of the given child layer within the given layer's children, if any.
+/// @param layer The layer containing the given child layer.
+/// @param child_layer The child layer to get the index of.
+/// @return The index of the given child layer within the given layer's children.
+/// If the given child layer is not within the given layer's children then `-1` is returned instead.
 int layer_get_child_index(const struct layer_t *layer,
-                          layer_id_t child_id)
+                          const struct layer_t *child_layer)
 {
     for (int i = 0; i < layer->num_children; i++)
-    {
-        const struct layer_t *child_layer = layer->children[i];
-        if (child_layer->id == child_id)
+        if (layer->children[i] == child_layer)
             return i;
-    }
 
     // if this point has been reached then no match was found
     return -1;
 }
 
-void layer_add_child(struct layer_t *layer,
-                     layer_id_t *child_id,
-                     struct layer_path_t *child_path,
-                     struct vector2_t anchor,
-                     struct vector2_t origin,
-                     struct vector2_t position,
-                     struct vector2_t size,
-                     struct vector2_t scale,
-                     struct vector2_t shear,
-                     float rotation)
+struct layer_t *layer_add_child(struct layer_t *layer,
+                                struct vector2_t anchor,
+                                struct vector2_t origin,
+                                struct vector2_t position,
+                                struct vector2_t size,
+                                struct vector2_t scale,
+                                struct vector2_t shear,
+                                float rotation)
 {
     // initialize the new child layer
     struct layer_t *child_layer = malloc(sizeof(struct layer_t));
     layer_init_dirty(child_layer,
                      layer,
-                     layer->next_child_id++,
                      anchor,
                      origin,
                      position,
@@ -314,37 +263,31 @@ void layer_add_child(struct layer_t *layer,
                      shear,
                      rotation);
 
-    // insert the new child layer
+    // insert and return the new child layer
     unsigned int child_index = layer->num_children++;
     layer->children = realloc(layer->children,
                               layer->num_children * sizeof(struct layer_t));
 
     layer->children[child_index] = child_layer;
-
-    // set the given pointer values
-    if (child_id != NULL)
-        *child_id = child_layer->id;
-
-    if (child_path != NULL)
-        *child_path = child_layer->path;
+    return child_layer;
 }
 
 void layer_remove_child(struct layer_t *layer,
-                        layer_id_t child_id)
+                        const struct layer_t *child_layer)
 {
     // attempt to get the index of the child layer to remove
-    int child_index = layer_get_child_index(layer, child_id);
+    int child_index = layer_get_child_index(layer, child_layer);
     if (child_index < 0)
     {
         // the child layer could not be found, print the details and terminate
-        fprintf(stderr, "LAYER ERROR: could not locate child layer %u within layer %p\n", child_id, layer);
+        fprintf(stderr, "LAYER ERROR: could not locate child layer %p within layer %p\n", child_layer, layer);
         exit(EXIT_FAILURE);
     }
 
     // deinitialize the child layer before removing it
-    struct layer_t *child_layer = layer->children[child_index];
-    layer_deinit(child_layer);
-    free(child_layer);
+    struct layer_t *layer_child_layer = layer->children[child_index];
+    layer_deinit(layer_child_layer);
+    free(layer_child_layer);
 
     // shuffle and reallocate the layers children array to remove the child layers element
     memmove(&layer->children[child_index],
@@ -356,42 +299,14 @@ void layer_remove_child(struct layer_t *layer,
                               layer->num_children * sizeof(struct layer_t));
 }
 
-struct layer_t *layer_get_child_id(struct layer_t *layer,
-                                   layer_id_t child_id)
-{
-    int child_index = layer_get_child_index(layer, child_id);
-    if (child_index >= 0)
-        return layer->children[child_index];
-    else
-        return NULL;
-}
-
-struct layer_t *layer_get_child_path(struct layer_t *root_layer,
-                                     const struct layer_path_t *path)
-{
-    // follow the given path, returning early if any component is not found
-    struct layer_t *layer = root_layer;
-    for (int i = 0; i < path->num_ids; i++)
-    {
-        layer_id_t child_id = path->ids[i];
-        struct layer_t *child_layer = layer_get_child_id(layer, child_id);
-        if (child_layer == NULL)
-            return NULL;
-
-        layer = child_layer;
-    }
-
-    return layer;
-}
-
 // MARK: Attachment
 
-/// Get the index of the first attachment matching the given unique identifier within the given layer's attachments.
-/// @param layer The layer containing the attachment to get the index of.
-/// @param id The unique identifier of the attachment to get the index of.
-/// @return The index of the first attachment matching the given unique identifier within the given layer's attachments.
-/// If no match was found then `-1` is returned instead.
-int layer_get_attachment_index(struct layer_t *layer,
+/// Get the index of the given attachment within the given layer's attachments, if any.
+/// @param layer The layer containing the given attachment.
+/// @param attachment The attachment to get the index of.
+/// @return The index of the given attachment within the given layer's attachments.
+/// If the given attachment is not within the given layer's attachments then `-1` is returned instead.
+int layer_get_attachment_index(const struct layer_t *layer,
                                const struct attachment_t *attachment)
 {
     for (int i = 0; i < layer->num_attachments; i++)
@@ -417,11 +332,11 @@ void layer_add_attachment(struct layer_t *layer,
     layer->attachments[index] = attachment;
 }
 
-void layer_add_attachment_colour(struct layer_t *layer,
-                                 struct colour4_t top_left,
-                                 struct colour4_t top_right,
-                                 struct colour4_t bottom_left,
-                                 struct colour4_t bottom_right)
+struct attachment_t *layer_add_attachment_colour(struct layer_t *layer,
+                                                 struct colour4_t top_left,
+                                                 struct colour4_t top_right,
+                                                 struct colour4_t bottom_left,
+                                                 struct colour4_t bottom_right)
 {
     // initialize the new colour attachment
     struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
@@ -431,15 +346,16 @@ void layer_add_attachment_colour(struct layer_t *layer,
                            bottom_left,
                            bottom_right);
 
-    // add the new colour attachment
+    // add and return the new colour attachment
     layer_add_attachment(layer, attachment);
+    return attachment;
 }
 
-void layer_add_attachment_texture(struct layer_t *layer,
-                                  struct texture_t *source,
-                                  unsigned int source_index,
-                                  struct uv_t bottom_left,
-                                  struct uv_t top_right)
+struct attachment_t *layer_add_attachment_texture(struct layer_t *layer,
+                                                  struct texture_t *source,
+                                                  unsigned int source_index,
+                                                  struct uv_t bottom_left,
+                                                  struct uv_t top_right)
 {
     // initialize the new texture attachment
     struct attachment_t *attachment = malloc(sizeof(struct attachment_t));
@@ -449,8 +365,9 @@ void layer_add_attachment_texture(struct layer_t *layer,
                             bottom_left,
                             top_right);
 
-    // add the new texture attachment
+    // add and return the new texture attachment
     layer_add_attachment(layer, attachment);
+    return attachment;
 }
 
 void layer_remove_attachment(struct layer_t *layer,
