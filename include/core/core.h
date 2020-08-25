@@ -28,9 +28,9 @@ void core_init(struct core_t *core);
 /// @param core The core context to deinitialize.
 void core_deinit(struct core_t *core);
 
-/// Poll for new global events within the given core context.
+/// Update the current state of the given core context.
 ///
 /// This should be called at the beginning of each frame, before updating anything else.
-/// @param core The core context to poll for global events.
-/// @param wait Whether or not the current thread should sleep until new global events are queued.
-void core_poll_events(struct core_t *core, bool wait);
+/// @param core The core context to update.
+/// @param wait_for_event Whether or not the current thread should sleep until a new event is posted for the given context.
+void core_update(struct core_t *core, bool wait_for_event);
