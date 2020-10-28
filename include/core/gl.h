@@ -1,4 +1,3 @@
 // include modern opengl and its prototypes
-#define GLFW_INCLUDE_GLCOREARB
-#define GL_GLEXT_PROTOTYPES
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>

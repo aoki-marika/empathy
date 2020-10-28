@@ -43,7 +43,7 @@ struct window_t
 /// Initialize the given window with the given parameters.
 ///
 /// The new window always contains an OpenGL 3.3 core graphics context.
-/// During this function the new window is set as the current window for the calling thread.
+/// During this function the current graphics context of the calling thread is cleared.
 /// @param window The window to initialize.
 /// @param width The width of the new window, in pixels.
 /// @param height The height of the new window, in pixels.
@@ -66,6 +66,11 @@ void window_deinit(struct window_t *window);
 /// Only one window at a time can be current on a given thread, but several windows can be current across separate threads.
 /// @param window The window containing the graphics context to make current.
 void window_set_current(struct window_t *window);
+
+/// Clear the current graphics context on the calling thread.
+///
+/// This must be called before the current graphics context on the calling thread can be set on another thread.
+void window_clear_current();
 
 /// Set the background colour of the given window to the given colour.
 ///

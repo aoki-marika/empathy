@@ -82,7 +82,7 @@ IMGUI_IMPL_SRC_DIR := $(IMGUI_DIR)/examples
 IMGUI_IMPL_OBJ_DIR := $(OBJ_DIR)/imgui_impl
 IMGUI_IMPL_SRCS := $(IMGUI_IMPL_SRC_DIR)/imgui_impl_glfw.cpp $(IMGUI_IMPL_SRC_DIR)/imgui_impl_opengl3.cpp
 IMGUI_IMPL_OBJS := $(IMGUI_IMPL_SRCS:$(IMGUI_IMPL_SRC_DIR)/%.cpp=$(IMGUI_IMPL_OBJ_DIR)/%.o)
-IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -I$(INC_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_CUSTOM='<core/gl.h>'
+IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 $(IMGUI_IMPL_OBJS): $(IMGUI_IMPL_OBJ_DIR)/%.o : $(IMGUI_IMPL_SRC_DIR)/%.cpp | $(IMGUI_IMPL_OBJ_DIR)
 	$(CXX) -c $< -o $@ $(IMGUI_IMPL_CXXFLAGS)
@@ -105,10 +105,10 @@ CORE_OUT := $(BIN_DIR)/libcore.a
 # link opengl depending on the platform
 ifeq ($(PLATFORM), WINDOWS)
 	# windows
-	CORE_LDFLAGS += -lopengl32
+	CORE_LDFLAGS += -lopengl32 -lglew32
 else ifeq ($(PLATFORM), LINUX)
 	# linux
-	CORE_LDFLAGS += -lGL
+	CORE_LDFLAGS += -lGL -lGLEW
 endif
 
 $(CORE_OUT): $(CORE_OBJS) $(CIMGUI_OBJS) $(IMGUI_IMPL_OBJS) | $(BIN_DIR)

@@ -1,5 +1,7 @@
 #include "window.h"
 
+#include <stdlib.h>
+
 // MARK: - Functions
 
 void window_init(struct window_t *window,
@@ -17,10 +19,31 @@ void window_init(struct window_t *window,
     window->height = height;
     window->backing = glfwCreateWindow(width, height, title, NULL, NULL);
 
-    // configure opengl
+    // configure the given windows graphics context
     window_set_current(window);
+
+    // enable vsync
+    // TODO: proper frame limiting
+    // instances should manage their own frame rate to allow custom limits,
+    // but also optionally support vsync
+    glfwSwapInterval(1);
+
+    // load opengl extensions
+    // must be done here instead of core_init as it requires an active opengl context
+    GLenum error = glewInit();
+    if (error != GLEW_OK)
+    {
+        // unable to load opengl extensions, print the details and terminate
+        fprintf(stderr, "WINDOW ERROR: unable to load opengl extensions for context of window backing %p: %s\n", window->backing, glewGetErrorString(error));
+        exit(EXIT_FAILURE);
+    }
+
+    // configure opengl
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // unset the given windows graphics context
+    window_clear_current();
 }
 
 void window_deinit(struct window_t *window)
@@ -31,6 +54,11 @@ void window_deinit(struct window_t *window)
 void window_set_current(struct window_t *window)
 {
     glfwMakeContextCurrent(window->backing);
+}
+
+void window_clear_current()
+{
+    glfwMakeContextCurrent(NULL);
 }
 
 void window_set_background(struct window_t *window, struct colour4_t colour)

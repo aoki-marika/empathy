@@ -21,6 +21,7 @@ Essentials:
 Dependencies:
  - `core`:
     - `cimgui` (included submodule)
+    - `libglew-dev` (`2.0.0-3`)
     - `libglfw3-dev` (`3.3.2-1`)
     - `libpng-dev` (`1.6.36-6`)
  - `sys2d`:
