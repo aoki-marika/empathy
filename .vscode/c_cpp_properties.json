@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "(Emp)athy",
+            "includePath": [
+                "include",
+                "include/**",
+                "cimgui",
+                "cimgui/generator/output",
+                "${default}"
+            ],
+            "defines": [
+                "DEBUG",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "gcc",
+            "cStandard": "gnu99",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
