@@ -38,6 +38,18 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -g -DDEBUG
 endif
 
+# windows make
+# make must be redirected to mingw make
+ifeq ($(PLATFORM), WINDOWS)
+	MAKE := mingw32-make.exe
+endif
+
+# windows cmake
+# cmake must be instructed to use the mingw toolchain on windows
+ifeq ($(PLATFORM), WINDOWS)
+	CMAKE := cmake -G "MinGW Makefiles"
+endif
+
 # cimgui
 CIMGUI_DIR := cimgui
 CIMGUI_OBJ_DIR := $(OBJ_DIR)/$(CIMGUI_DIR)
@@ -46,6 +58,11 @@ CIMGUI_INC_DIR := $(CIMGUI_DIR)/generator/output
 CIMGUI_BUILD_DIR := $(CIMGUI_MAKE_DIR)/CMakeFiles/cimgui.dir
 CIMGUI_OBJS := $(CIMGUI_BUILD_DIR)/cimgui.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_demo.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_draw.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_widgets.cpp.o
 CIMGUI_OUT := $(CIMGUI_MAKE_DIR)/cimgui.a
+
+# cimgui object files have an obj extension instead of o on windows
+ifeq ($(PLATFORM), WINDOWS)
+	CIMGUI_OBJS := $(CIMGUI_OBJS:%.o=%.obj)
+endif
 
 $(CIMGUI_OUT): | $(CIMGUI_MAKE_DIR)
 	$(CD) $(CIMGUI_MAKE_DIR) && $(CMAKE) ../../$(CIMGUI_DIR) -DIMGUI_STATIC="yes"
@@ -86,7 +103,10 @@ CORE_LDFLAGS := $(LDFLAGS) -lglfw3 -lpng16 -pthread
 CORE_OUT := $(BIN_DIR)/libcore.a
 
 # link opengl depending on the platform
-ifeq ($(PLATFORM), LINUX)
+ifeq ($(PLATFORM), WINDOWS)
+	# windows
+	CORE_LDFLAGS += -lopengl32
+else ifeq ($(PLATFORM), LINUX)
 	# linux
 	CORE_LDFLAGS += -lGL
 endif
