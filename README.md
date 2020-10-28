@@ -1,6 +1,6 @@
 # (Emp)athy
 
-An experimental music game based on the concept of communicating music through gameplay, aesthetically inspired by the underground electronic music scene.
+A project with abstract goals of communicating and exploring emotion.
 
 ## Development
 
@@ -12,27 +12,60 @@ This project is split into several smaller components:
  - `sys2d`: The 2D subsystem.
  - `game`: The end user game.
 
-### Building
+### Requirements
 
-Essentials:
- - `gcc`, `make`, and the C standard library are required for all targets.
- - `g++`, `cmake`, and the C++ standard library are required for all targets to build and link `cimgui`.
+Toolchain:
+ - GCC and G++
+    - Debian: `build-essential`
+    - MSYS2: `mingw-w64-x86_64-gcc`
+ - GNU Make
+     - Debian: `build-essential`
+     - MSYS2: `mingw-w64-x86_64-make`
+ - CMake
+     - Debian: `cmake`
+     - MSYS2: `mingw-w64-x86_64-cmake`
 
 Dependencies:
  - `core`:
     - `cimgui` (included submodule)
-    - `libglew-dev` (`2.0.0-3`)
-    - `libglfw3-dev` (`3.3.2-1`)
-    - `libpng-dev` (`1.6.36-6`)
+    - GLEW (`2.0`)
+       - Debian: `libglew-dev`
+       - MSYS2: `mingw-w64-x86_64-glew`
+    - GLFW (`3.3`)
+       - Debian: `libglfw3-dev`
+       - MSYS2: `mingw-w64-x86_64-glfw`
+    - libpng (`1.6`)
+       - Debian: `libpng-dev`
+       - MSYS2: `mingw-w64-x86_64-libpng`
  - `sys2d`:
     - `core` (included)
  - `game`:
     - `core` (included)
     - `sys2d` (included)
 
-Each component can be built with `make [component] DEBUG=[0/1]` from the root of the project.
-If no `DEBUG` option is supplied then a release build is compiled.
+### Building
 
-Build output can be deleted with `make clean`.
+#### Windows
 
-**Note**: When switching between different `DEBUG` options `make clean` must be run to ensure that everything is rebuilt with the new flags.
+ - Install [MSYS2](https://www.msys2.org/).
+ - Install the required toolchain and dependencies with `pacman`.
+ - **Command line**:
+    - Run `mingw32-make.exe [component] DEBUG=[0/1]` from the root of the repository within an MSYS2 MinGW 64-bit shell.
+    - The build output is within `bin/`.
+ - **Visual Studio Code**:
+    - A VS Code workspace is provided for a more integrated development experience on Windows.
+    - Add the MinGW 64-bit bin (`C:\msys64\mingw64\bin` with the default MSYS2 install path) to the Windows `PATH` environment variable.
+       - See [this document](https://code.visualstudio.com/docs/cpp/config-mingw#_prerequisites) if you're unsure how.
+    - Run the `Game (Debug)` or `Game (Release)` targets to compile and execute the `game` target in the respective configuration.
+       - The `Build Game (Debug)` and `Build Game (Release)` tasks can be used directly to build only.
+
+#### Linux
+
+ - Install the required toolchain and dependencies.
+ - Run `make [component] DEBUG=[0/1]` from the root of the repository.
+ - The build output is within `bin/`.
+
+ ---
+
+ Note that the `clean` target, or the `Clean` task in VS Code, must be performed when switching between debug and release.
+ This ensures all sources are recompiled for the respective target.
