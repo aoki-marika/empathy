@@ -84,6 +84,12 @@ IMGUI_IMPL_SRCS := $(IMGUI_IMPL_SRC_DIR)/imgui_impl_glfw.cpp $(IMGUI_IMPL_SRC_DI
 IMGUI_IMPL_OBJS := $(IMGUI_IMPL_SRCS:$(IMGUI_IMPL_SRC_DIR)/%.cpp=$(IMGUI_IMPL_OBJ_DIR)/%.o)
 IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
+# windows are always reported as unfocused in non-main threads on windows, disabling mouse input
+# so force windows to always be considered focused
+ifeq ($(PLATFORM), WINDOWS)
+	IMGUI_IMPL_CXXFLAGS += -D__EMSCRIPTEN__
+endif
+
 $(IMGUI_IMPL_OBJS): $(IMGUI_IMPL_OBJ_DIR)/%.o : $(IMGUI_IMPL_SRC_DIR)/%.cpp | $(IMGUI_IMPL_OBJ_DIR)
 	$(CXX) -c $< -o $@ $(IMGUI_IMPL_CXXFLAGS)
 
