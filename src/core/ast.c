@@ -5,6 +5,10 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef WINDOWS
+#include <fileapi.h>
+#endif
+
 #include "bin.h"
 #include "png.h"
 
@@ -213,9 +217,30 @@ void ast_write_contents(FILE *file,
     // this stream is used to write dynamically-sized data, such as pngs,
     // in a block below statically-sized data
     // this allows pointers to be easily calculated while writing the file
+    // memstreams are only available on linux, so use a temp file on windows
+    // TODO: memstream replacement to share functionality with other file formats
+    #ifdef WINDOWS
+    // tmpfile_s would be more desirable, but it seems to always fail,
+    // so perform a similar operation manually
+    // get the path of the temp directory
+    char stream_path[MAX_PATH];
+    GetTempPath(MAX_PATH, stream_path);
+
+    // get the path of the temp file, with an "ast" prefix
+    char stream_filename[MAX_PATH];
+    GetTempFileName(stream_path,
+                    TEXT("ast"),
+                    0,
+                    stream_filename);
+
+    // open the temp file
+    FILE *stream_file = fopen(stream_filename, "wb+");
+    #elif LINUX
+    // open the memstream
     char *stream;
     size_t stream_size = 0;
     FILE *stream_file = open_memstream(&stream, &stream_size);
+    #endif
 
     // write the header
     fprintf(file, "AST");
@@ -288,6 +313,26 @@ void ast_write_contents(FILE *file,
 
     // write and close the data stream
     fflush(stream_file);
+    #ifdef WINDOWS
+    // read the contents of the temp file
+    fseek(stream_file, 0, SEEK_END);
+    unsigned int stream_size = ftell(stream_file);
+    unsigned char *stream = malloc(stream_size);
+    fseek(stream_file, 0, SEEK_SET);
+    fread(stream, stream_size, 1, stream_file);
+
+    // write the contents of the temp file to the given file
     fwrite(stream, stream_size, 1, file);
+    free(stream);
+    #elif LINUX
+    // write the contents of the memstream
+    fwrite(stream, stream_size, 1, file);
+    #endif
+
     fclose(stream_file);
+
+    // if a temp file was used for the data stream then remove it
+    #ifdef WINDOWS
+    remove(stream_filename);
+    #endif
 }
