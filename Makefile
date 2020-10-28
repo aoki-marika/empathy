@@ -2,11 +2,11 @@
 ifeq ($(OS), Windows_NT)
 	PLATFORM := WINDOWS
 else
-	UNAME := $(uname -s)
+	UNAME := $(shell uname -s)
 	ifeq ($(UNAME), Linux)
 		PLATFORM := LINUX
 	else
-		(echo "unknown platform $(OS) ($(UNAME))"; exit 1)
+        $(error Unknown platform)
 	endif
 endif
 
@@ -105,16 +105,16 @@ CORE_SRCS := $(wildcard $(CORE_SRC_DIR)/*.c)
 CORE_OBJS := $(CORE_SRCS:$(CORE_SRC_DIR)/%.c=$(CORE_OBJ_DIR)/%.o)
 CORE_DEPS := $(CORE_OBJS:%.o=%.d)
 CORE_CFLAGS := $(CFLAGS) -I$(CORE_INC_DIR)
-CORE_LDFLAGS := $(LDFLAGS) -lglfw3 -lpng16 -pthread
+CORE_LDFLAGS := $(LDFLAGS) -lpng16 -pthread
 CORE_OUT := $(BIN_DIR)/libcore.a
 
-# link opengl depending on the platform
+# link opengl and other platform-specific libraries depending on the platform
 ifeq ($(PLATFORM), WINDOWS)
 	# windows
-	CORE_LDFLAGS += -lopengl32 -lglew32
+	CORE_LDFLAGS += -lglfw3 -lopengl32 -lglew32
 else ifeq ($(PLATFORM), LINUX)
 	# linux
-	CORE_LDFLAGS += -lGL -lGLEW
+	CORE_LDFLAGS += -lglfw -lGL -lGLEW
 endif
 
 $(CORE_OUT): $(CORE_OBJS) $(CIMGUI_OBJS) $(IMGUI_IMPL_OBJS) | $(BIN_DIR)
