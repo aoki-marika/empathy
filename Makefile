@@ -1,3 +1,16 @@
+# get the target platform
+ifeq ($(OS), Windows_NT)
+	PLATFORM := WINDOWS
+else
+	UNAME := $(uname -s)
+	ifeq ($(UNAME), Linux)
+		PLATFORM := LINUX
+	else
+		(echo "unknown platform $(OS) ($(UNAME))"; exit 1)
+	endif
+endif
+
+# constants
 INC_DIR := include
 SRC_DIR := src
 BIN_DIR := bin
@@ -6,7 +19,7 @@ OBJ_DIR := $(BIN_DIR)/obj
 CC := gcc
 CXX := g++
 LD := $(CXX)
-CFLAGS := -I$(INC_DIR)
+CFLAGS := -I$(INC_DIR) -D$(PLATFORM)
 LDFLAGS :=
 
 AR := ar
@@ -69,8 +82,14 @@ CORE_SRCS := $(wildcard $(CORE_SRC_DIR)/*.c)
 CORE_OBJS := $(CORE_SRCS:$(CORE_SRC_DIR)/%.c=$(CORE_OBJ_DIR)/%.o)
 CORE_DEPS := $(CORE_OBJS:%.o=%.d)
 CORE_CFLAGS := $(CFLAGS) -I$(CORE_INC_DIR)
-CORE_LDFLAGS := $(LDFLAGS) -lglfw -lGL -lpng -pthread
+CORE_LDFLAGS := $(LDFLAGS) -lglfw3 -lpng16 -pthread
 CORE_OUT := $(BIN_DIR)/libcore.a
+
+# link opengl depending on the platform
+ifeq ($(PLATFORM), LINUX)
+	# linux
+	CORE_LDFLAGS += -lGL
+endif
 
 $(CORE_OUT): $(CORE_OBJS) $(CIMGUI_OBJS) $(IMGUI_IMPL_OBJS) | $(BIN_DIR)
 	$(AR) rcs $@ $^
