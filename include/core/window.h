@@ -79,14 +79,19 @@ void window_clear_current();
 /// @param colour The colour to set the background colour to.
 void window_set_background(struct window_t *window, struct colour4_t colour);
 
-/// Get whether or not the given window was closed by the user.
+/// Get whether or not the given window wants to be closed.
 ///
-/// Window closure is not automatic, this only indicates whether or not the user tried to close the given window.
-/// This should be checked before beginning a new frame to determine whether or not the given window's frame loop should terminate.
-/// `core_poll_events(struct core_t *)` must be called before this value will update.
-/// @param window The window to check.
-/// @return Whether or not the given window was closed by the user.
+/// Window closure is not automatic, this only indicates whether or not the window wants to be closed.
+/// See `window_deinit(struct window_t *)` for closing the window.
+/// `core_update(struct core_t *)` must be called before this value will update in response to user input.
+/// @param window The window to get the closed state of.
+/// @return Whether or not the given window wants to close.
 bool window_is_closed(struct window_t *window);
+
+/// Set whether or not the given window wants to be closed.
+/// @param window The window to set the closed state of.
+/// @param is_closed Whether or not the window should be marked as wanting to be closed.
+void window_set_closed(struct window_t *window, bool is_closed);
 
 /// Begin a new frame that will be displayed by the given window.
 ///

@@ -72,6 +72,11 @@ bool window_is_closed(struct window_t *window)
     return glfwWindowShouldClose(window->backing) == GLFW_TRUE;
 }
 
+void window_set_closed(struct window_t *window, bool is_closed)
+{
+    glfwSetWindowShouldClose(window->backing, (is_closed) ? GLFW_TRUE : GLFW_FALSE);
+}
+
 void window_begin_frame(struct window_t *window)
 {
     window_set_current(window);
