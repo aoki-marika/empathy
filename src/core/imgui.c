@@ -30,7 +30,6 @@ void imgui_init(struct imgui_t *imgui,
 
 void imgui_deinit(struct imgui_t *imgui)
 {
-    // deinit imgui and the context
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     igDestroyContext(imgui->context);

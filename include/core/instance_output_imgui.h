@@ -74,6 +74,9 @@ struct instance_output_imgui_t
 /// Initialize the given IMGUI instance output.
 ///
 /// The new IMGUI output automatically has the default program and frame rate tools added.
+/// Due to the limitations of the IMGUI implementations,
+/// only a single IMGUI instance output can be created per core program,
+/// and cannot be shared across instances.
 /// @param output The output to initialize.
 void instance_output_imgui_init(struct instance_output_imgui_t *output);
 

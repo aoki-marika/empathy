@@ -6,8 +6,7 @@
                 "include",
                 "include/**",
                 "cimgui",
-                "cimgui/generator/output",
-                "${default}"
+                "cimgui/generator/output"
             ],
             "defines": [
                 "DEBUG",
