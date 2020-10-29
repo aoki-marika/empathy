@@ -9,7 +9,7 @@
 ///
 /// This is the actual function which runs the given instance's program,
 /// `instance_run(struct instance_t *)` is only a wrapper to create the thread.
-/// @param arguemnt The pointer to the instance to run the program of.
+/// @param argument The pointer to the instance to run the program of.
 void *instance_run_internal(void *argument)
 {
     struct instance_t *instance = (struct instance_t *)argument;
@@ -79,6 +79,9 @@ void instance_init(struct instance_t *instance,
 
     // initialize the given instances output
     instance->output = output;
+
+    // unset the given windows graphics context to allow it to be set when running the given instance
+    window_clear_current();
 }
 
 void instance_deinit(struct instance_t *instance)
@@ -108,6 +111,7 @@ void instance_run(struct instance_t *instance)
     instance->program.is_running = true;
 
     // create the thread and actually run the given instances program
+    // TODO: core threading wrapper
     pthread_t thread;
     pthread_create(&thread, NULL, instance_run_internal, instance);
 }

@@ -1,3 +1,16 @@
+# get the target platform
+ifeq ($(OS), Windows_NT)
+	PLATFORM := WINDOWS
+else
+	UNAME := $(shell uname -s)
+	ifeq ($(UNAME), Linux)
+		PLATFORM := LINUX
+	else
+        $(error Unknown platform)
+	endif
+endif
+
+# constants
 INC_DIR := include
 SRC_DIR := src
 BIN_DIR := bin
@@ -6,7 +19,7 @@ OBJ_DIR := $(BIN_DIR)/obj
 CC := gcc
 CXX := g++
 LD := $(CXX)
-CFLAGS := -I$(INC_DIR)
+CFLAGS := -I$(INC_DIR) -D$(PLATFORM)
 LDFLAGS :=
 
 AR := ar
@@ -25,6 +38,18 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -g -DDEBUG
 endif
 
+# windows make
+# make must be redirected to mingw make
+ifeq ($(PLATFORM), WINDOWS)
+	MAKE := mingw32-make.exe
+endif
+
+# windows cmake
+# cmake must be instructed to use the mingw toolchain on windows
+ifeq ($(PLATFORM), WINDOWS)
+	CMAKE := cmake -G "MinGW Makefiles"
+endif
+
 # cimgui
 CIMGUI_DIR := cimgui
 CIMGUI_OBJ_DIR := $(OBJ_DIR)/$(CIMGUI_DIR)
@@ -33,6 +58,11 @@ CIMGUI_INC_DIR := $(CIMGUI_DIR)/generator/output
 CIMGUI_BUILD_DIR := $(CIMGUI_MAKE_DIR)/CMakeFiles/cimgui.dir
 CIMGUI_OBJS := $(CIMGUI_BUILD_DIR)/cimgui.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_demo.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_draw.cpp.o $(CIMGUI_BUILD_DIR)/imgui/imgui_widgets.cpp.o
 CIMGUI_OUT := $(CIMGUI_MAKE_DIR)/cimgui.a
+
+# cimgui object files have an obj extension instead of o on windows
+ifeq ($(PLATFORM), WINDOWS)
+	CIMGUI_OBJS := $(CIMGUI_OBJS:%.o=%.obj)
+endif
 
 $(CIMGUI_OUT): | $(CIMGUI_MAKE_DIR)
 	$(CD) $(CIMGUI_MAKE_DIR) && $(CMAKE) ../../$(CIMGUI_DIR) -DIMGUI_STATIC="yes"
@@ -52,7 +82,13 @@ IMGUI_IMPL_SRC_DIR := $(IMGUI_DIR)/examples
 IMGUI_IMPL_OBJ_DIR := $(OBJ_DIR)/imgui_impl
 IMGUI_IMPL_SRCS := $(IMGUI_IMPL_SRC_DIR)/imgui_impl_glfw.cpp $(IMGUI_IMPL_SRC_DIR)/imgui_impl_opengl3.cpp
 IMGUI_IMPL_OBJS := $(IMGUI_IMPL_SRCS:$(IMGUI_IMPL_SRC_DIR)/%.cpp=$(IMGUI_IMPL_OBJ_DIR)/%.o)
-IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -I$(INC_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_CUSTOM='<core/gl.h>'
+IMGUI_IMPL_CXXFLAGS := -I$(IMGUI_DIR) -DIMGUI_IMPL_API='extern "C"' -DIMGUI_IMPL_OPENGL_LOADER_GLEW
+
+# windows are always reported as unfocused in non-main threads on windows, disabling mouse input
+# so force windows to always be considered focused
+ifeq ($(PLATFORM), WINDOWS)
+	IMGUI_IMPL_CXXFLAGS += -D__EMSCRIPTEN__
+endif
 
 $(IMGUI_IMPL_OBJS): $(IMGUI_IMPL_OBJ_DIR)/%.o : $(IMGUI_IMPL_SRC_DIR)/%.cpp | $(IMGUI_IMPL_OBJ_DIR)
 	$(CXX) -c $< -o $@ $(IMGUI_IMPL_CXXFLAGS)
@@ -69,8 +105,17 @@ CORE_SRCS := $(wildcard $(CORE_SRC_DIR)/*.c)
 CORE_OBJS := $(CORE_SRCS:$(CORE_SRC_DIR)/%.c=$(CORE_OBJ_DIR)/%.o)
 CORE_DEPS := $(CORE_OBJS:%.o=%.d)
 CORE_CFLAGS := $(CFLAGS) -I$(CORE_INC_DIR)
-CORE_LDFLAGS := $(LDFLAGS) -lglfw -lGL -lpng -pthread
+CORE_LDFLAGS := $(LDFLAGS) -lpng16 -pthread
 CORE_OUT := $(BIN_DIR)/libcore.a
+
+# link opengl and other platform-specific libraries depending on the platform
+ifeq ($(PLATFORM), WINDOWS)
+	# windows
+	CORE_LDFLAGS += -lglfw3 -lopengl32 -lglew32
+else ifeq ($(PLATFORM), LINUX)
+	# linux
+	CORE_LDFLAGS += -lglfw -lGL -lGLEW
+endif
 
 $(CORE_OUT): $(CORE_OBJS) $(CIMGUI_OBJS) $(IMGUI_IMPL_OBJS) | $(BIN_DIR)
 	$(AR) rcs $@ $^

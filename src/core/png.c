@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <libpng/png.h>
+#include <libpng16/png.h>
 
 #include "texture.h"
 
@@ -12,9 +12,9 @@
 void png_init_file(struct png_t *png, FILE *file)
 {
     // check the signature
-    char signature[8];
+    png_byte signature[8];
     fread(signature, sizeof(signature), 1, file);
-    if (png_sig_cmp(signature, 0, 8))
+    if (png_sig_cmp(signature, 0, sizeof(signature) / sizeof(png_byte)))
     {
         // the signature check failed, print the details and terminate
         fprintf(stderr, "PNG ERROR: invalid signature\n");

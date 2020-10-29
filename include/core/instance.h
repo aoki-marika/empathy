@@ -112,7 +112,7 @@ struct instance_t
 
 /// Initialize the given instance with the given render size.
 ///
-/// During this function the given window's graphics context is set as current.
+/// During this function the current graphics context of the calling thread is cleared.
 /// During this function `TEXTURE_INIT_UNIT` is activated and bound to.
 /// During this function the current render target is reset.
 /// @param instance The instance to deinitialize.

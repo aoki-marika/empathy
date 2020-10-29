@@ -5,15 +5,27 @@
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h>
+
+#ifdef WINDOWS
+#include <libloaderapi.h>
+#elif LINUX
 #include <linux/limits.h>
+#endif
 
 // MARK: - Functions
 
 char *platform_get_path()
 {
     // read the executable path
+    // windows
+    #ifdef WINDOWS
+    char buffer[MAX_PATH];
+    GetModuleFileName(NULL, buffer, sizeof(buffer));
+    // linux
+    #elif LINUX
     char buffer[PATH_MAX];
     readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    #endif
 
     // copy the path into an allocated buffer and return it
     size_t path_size = strlen(buffer) + 1;

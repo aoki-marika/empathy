@@ -31,6 +31,8 @@ struct imgui_t
 // MARK: - Functions
 
 /// Initialize the given IMGUI context within the given window, using the given INI file.
+///
+/// Due to the limitations of the IMGUI implementations, only a single context can be created per core program.
 /// @param imgui The IMGUI context to initialize.
 /// @param window The window to create the new context within.
 /// @param ini_name The name of the INI file used to maintain the state of the new IMGUI context across program executions.
